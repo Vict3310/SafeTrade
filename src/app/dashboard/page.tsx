@@ -298,8 +298,8 @@ export default function Dashboard() {
           />
         </div>
       ) : (
-        <Tour />
         <>
+          <Tour />
           <div className="flex flex-col lg:flex-row justify-between lg:items-end items-start gap-8 mb-16">
             <div className="flex items-center gap-6">
               <div className="relative group">
