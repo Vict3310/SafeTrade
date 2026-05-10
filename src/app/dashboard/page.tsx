@@ -362,25 +362,26 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div id="vault-stats" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-            {/* Stats Cards with Haptic Hover */}
+          <div id="vault-stats" className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-16">
+            {/* Stats Cards: Compact & Pill-Shaped */}
             {[
-              { label: "Vault Balance", val: formatPrice(displayBalance + deals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.price_naira || 0), 0)), icon: <Wallet className="text-accent" />, color: "bg-accent/5 border-accent/20" },
-              { label: "Locked Funds", val: formatPrice(deals.filter(d => d.status === 'Funded').reduce((sum, d) => sum + (d.price_naira || 0), 0)), icon: <Clock className="text-yellow-500" />, color: "bg-yellow-500/5 border-yellow-500/20" },
-              { label: "Realized Income", val: formatPrice(deals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.price_naira || 0), 0)), icon: <CheckCircle className="text-green-500" />, color: "bg-green-500/5 border-green-500/20" }
+              { label: "Balance", val: displayBalance + deals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.price_naira || 0), 0), icon: <Wallet size={12} className="text-accent" />, color: "bg-accent/5 border-accent/20" },
+              { label: "Locked", val: deals.filter(d => d.status === 'Funded').reduce((sum, d) => sum + (d.price_naira || 0), 0), icon: <Clock size={12} className="text-yellow-500" />, color: "bg-yellow-500/5 border-yellow-500/20" },
+              { label: "Income", val: deals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.price_naira || 0), 0), icon: <CheckCircle size={12} className="text-green-500" />, color: "bg-green-500/5 border-green-500/20" },
             ].map((stat, i) => (
               <motion.div 
                 key={i}
-                whileHover={{ y: -5, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`${stat.color} border p-8 transition-all cursor-default relative overflow-hidden group`}
+                whileHover={{ scale: 1.02 }}
+                className={`${stat.color} px-5 py-3 rounded-full border backdrop-blur-sm flex items-center justify-between gap-3 transition-all`}
               >
-                <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-white/5 rounded-full">{stat.icon}</div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-full">
+                    {stat.icon}
                   </div>
-                  <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-1">{stat.label}</p>
-                  <p className="text-3xl font-extrabold tracking-tight">{stat.val}</p>
+                  <div>
+                    <p className="text-[8px] font-black opacity-40 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+                    <h3 className="text-sm font-black tracking-tight leading-none">{formatPrice(stat.val)}</h3>
+                  </div>
                 </div>
               </motion.div>
             ))}
