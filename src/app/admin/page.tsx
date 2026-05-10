@@ -81,7 +81,7 @@ export default function AdminDashboard() {
         abi: SAFETRADE_ABI,
         functionName: 'resolveDispute',
         args: [BigInt(id), winnerAddress],
-        gas: 1_000_000n,
+        gas: BigInt(1000000),
       });
     } catch (err: any) {
       console.error("Resolution error:", err);
