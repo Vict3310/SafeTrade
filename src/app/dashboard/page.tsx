@@ -12,15 +12,8 @@ import Link from "next/link";
 import { WhatsAppService } from "@/lib/whatsapp";
 import { defineChain } from "thirdweb";
 
-export const celoSepolia = defineChain({
-  id: 44787,
-  rpc: "https://44787.rpc.thirdweb.com", // Thirdweb optimized RPC
-  nativeCurrency: {
-    name: "CELO",
-    symbol: "CELO",
-    decimals: 18,
-  },
-});
+import { celoSepoliaTestnet } from "thirdweb/chains";
+export const celoSepolia = celoSepoliaTestnet;
 import { useWalletBalance } from "thirdweb/react";
 
 const wallets = [

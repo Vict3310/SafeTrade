@@ -11,15 +11,8 @@ import { usePaystackPayment } from "react-paystack";
 import { WhatsAppService } from "@/lib/whatsapp";
 import { defineChain, getContract } from "thirdweb";
 
-const celoSepolia = defineChain({
-  id: 44787,
-  rpc: "https://44787.rpc.thirdweb.com",
-  nativeCurrency: {
-    name: "CELO",
-    symbol: "CELO",
-    decimals: 18,
-  },
-});
+import { celoSepoliaTestnet } from "thirdweb/chains";
+const celoSepolia = celoSepoliaTestnet;
 import { useWalletBalance, useSendTransaction } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
 
