@@ -13,6 +13,7 @@ import { defineChain, getContract } from "thirdweb";
 import { createWallet } from "thirdweb/wallets";
 import { useToast } from "@/components/Toast";
 import confetti from "canvas-confetti";
+import Link from "next/link";
 import { EXCHANGE_RATE, SERVICE_FEE_PERCENT } from "@/lib/constants";
 
 import { celoSepoliaTestnet } from "thirdweb/chains";
