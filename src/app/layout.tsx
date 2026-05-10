@@ -9,11 +9,14 @@ import { ToastProvider } from "@/components/Toast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-main" });
 
+import { Zap, Lock, Shield, Rocket, Globe } from "lucide-react";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // ... (rest of the component)
   const [mounted, setMounted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -68,26 +71,26 @@ export default function RootLayout({
                 <div className="w-full bg-accent text-white py-2 overflow-hidden whitespace-nowrap border-b border-white/10">
                   <div className="flex gap-12 animate-[marquee_30s_linear_infinite] px-4">
                     {[
-                      "⚡ NEW SAFE-LINK SECURED IN IKEJA",
-                      "🔒 ₦250,000 RELEASED TO VENDOR #421",
-                      "🛡️ PROTOCOL AUDIT: 100% INTEGRITY",
-                      "🚀 1.2M CELO LOCKED IN THE VAULT",
-                      "🌍 CROSS-BORDER SETTLEMENT ACTIVE",
-                    ].map((text, i) => (
+                      { icon: <Zap size={10} />, text: "NEW SAFE-LINK SECURED IN IKEJA" },
+                      { icon: <Lock size={10} />, text: "₦250,000 RELEASED TO VENDOR #421" },
+                      { icon: <Shield size={10} />, text: "PROTOCOL AUDIT: 100% INTEGRITY" },
+                      { icon: <Rocket size={10} />, text: "1.2M CELO LOCKED IN THE VAULT" },
+                      { icon: <Globe size={10} />, text: "CROSS-BORDER SETTLEMENT ACTIVE" },
+                    ].map((item, i) => (
                       <span key={i} className="text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                        {text} <div className="w-1 h-1 bg-white rounded-full"></div>
+                        {item.icon} {item.text} <div className="w-1 h-1 bg-white rounded-full"></div>
                       </span>
                     ))}
                     {/* Duplicate for seamless loop */}
                     {[
-                      "⚡ NEW SAFE-LINK SECURED IN IKEJA",
-                      "🔒 ₦250,000 RELEASED TO VENDOR #421",
-                      "🛡️ PROTOCOL AUDIT: 100% INTEGRITY",
-                      "🚀 1.2M CELO LOCKED IN THE VAULT",
-                      "🌍 CROSS-BORDER SETTLEMENT ACTIVE",
-                    ].map((text, i) => (
+                      { icon: <Zap size={10} />, text: "NEW SAFE-LINK SECURED IN IKEJA" },
+                      { icon: <Lock size={10} />, text: "₦250,000 RELEASED TO VENDOR #421" },
+                      { icon: <Shield size={10} />, text: "PROTOCOL AUDIT: 100% INTEGRITY" },
+                      { icon: <Rocket size={10} />, text: "1.2M CELO LOCKED IN THE VAULT" },
+                      { icon: <Globe size={10} />, text: "CROSS-BORDER SETTLEMENT ACTIVE" },
+                    ].map((item, i) => (
                       <span key={i} className="text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                        {text} <div className="w-1 h-1 bg-white rounded-full"></div>
+                        {item.icon} {item.text} <div className="w-1 h-1 bg-white rounded-full"></div>
                       </span>
                     ))}
                   </div>
