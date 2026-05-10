@@ -81,7 +81,6 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
   // Paystack Config
   const config = {
     reference: (new Date()).getTime().toString(),
-    email: "buyer@safetrade.com", 
     email: "buyer@kova.com", 
     amount: (deal?.price_naira || 0) * 100, 
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "",
