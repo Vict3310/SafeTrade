@@ -46,6 +46,9 @@ export default function Dashboard() {
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [userPhone, setUserPhone] = useState("");
 
   // REAL On-chain Balance (cUSD on Celo Sepolia)
   const { data: balanceData, isLoading: isBalanceLoading } = useWalletBalance({
@@ -93,14 +96,35 @@ export default function Dashboard() {
           role: 'client' 
         }
       ]);
+      setShowOnboarding(true);
+    } else if (!data.full_name || !data.phone_number) {
+      setShowOnboarding(true);
+    }
+  };
+
+  const handleOnboarding = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { error } = await supabase
+      .from('profiles')
+      .update({ 
+        full_name: userName, 
+        phone_number: userPhone 
+      })
+      .eq('wallet_address', account?.address);
+
+    if (!error) {
+      setShowOnboarding(false);
+      alert("Profile verified! Welcome to SafeTrade.");
     }
   };
 
   const fetchDeals = async () => {
+    if (!account?.address) return;
     setLoading(true);
     const { data, error } = await supabase
       .from('deals')
       .select('*')
+      .eq('vendor_wallet', account.address)
       .order('created_at', { ascending: false });
 
     if (!error && data) {
@@ -401,6 +425,42 @@ export default function Dashboard() {
                 )}
 
                 <button type="submit" className="w-full bg-white text-black py-6 text-[10px] font-extrabold uppercase tracking-[0.3em] hover:bg-white/90">GENERATE LINK</button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+        {showOnboarding && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/95 backdrop-blur-xl" />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative w-full max-w-md bg-[#0A0A0A] p-12 border border-white/10 text-center">
+              <Shield size={64} className="mx-auto mb-8 text-accent" />
+              <h2 className="text-3xl font-extrabold mb-2 uppercase tracking-tighter">Identity Verification</h2>
+              <p className="text-xs font-bold opacity-40 uppercase tracking-widest mb-12">Complete your auditor profile to begin trading.</p>
+              
+              <form onSubmit={handleOnboarding} className="space-y-8 text-left">
+                <div>
+                  <label className="text-[10px] font-bold opacity-40 uppercase tracking-widest block mb-2">Full Business Name</label>
+                  <input 
+                    type="text" 
+                    value={userName} 
+                    onChange={(e) => setUserName(e.target.value)} 
+                    className="w-full bg-transparent border-b border-white/20 py-4 outline-none focus:border-accent text-lg font-bold" 
+                    placeholder="E.g. Global Tech Hub" 
+                    required 
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold opacity-40 uppercase tracking-widest block mb-2">WhatsApp Number</label>
+                  <input 
+                    type="text" 
+                    value={userPhone} 
+                    onChange={(e) => setUserPhone(e.target.value)} 
+                    className="w-full bg-transparent border-b border-white/20 py-4 outline-none focus:border-accent text-lg font-bold" 
+                    placeholder="+234..." 
+                    required 
+                  />
+                </div>
+                <button type="submit" className="w-full bg-accent text-white py-6 text-[10px] font-extrabold uppercase tracking-[0.3em] hover:brightness-110">Initialize Profile</button>
               </form>
             </motion.div>
           </div>
