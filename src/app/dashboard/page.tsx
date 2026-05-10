@@ -289,7 +289,7 @@ export default function Dashboard() {
 
 
   return (
-    <div className="premium-container pt-20">
+    <div className="pt-20">
       {!account ? (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <Wallet size={64} className="mb-8 opacity-20" />
@@ -306,7 +306,7 @@ export default function Dashboard() {
       ) : (
         <>
           <Tour />
-          <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-8 mb-16 bg-white/5 border border-white/10 p-8">
+          <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-8 mb-16 px-4">
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="relative group">
                 <ConnectButton 
@@ -343,23 +343,20 @@ export default function Dashboard() {
 
               {/* Action Icons */}
               <div className="flex gap-2">
-                <Link href="/settings" title="Profile Settings" className="w-12 h-12 flex items-center justify-center border border-white/10 hover:bg-white hover:text-black transition-all">
-                  <Settings size={18} />
-                </Link>
                 {address.toLowerCase() === ADMIN_WALLET.toLowerCase() && (
-                  <Link href="/admin/disputes" title="Arbitration Center" className="w-12 h-12 flex items-center justify-center border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
-                    <Shield size={18} />
+                  <Link href="/admin/disputes" title="Arbitration Center" className="w-10 h-10 rounded-full flex items-center justify-center border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                    <Shield size={16} />
                   </Link>
                 )}
-                <button onClick={() => setShowWithdrawModal(true)} title="Withdraw Earnings" className="w-12 h-12 flex items-center justify-center border border-white/10 hover:bg-white hover:text-black transition-all">
-                  <ArrowUpRight size={18} />
+                <button onClick={() => setShowWithdrawModal(true)} title="Withdraw Earnings" className="w-10 h-10 rounded-full flex items-center justify-center border border-white/10 hover:bg-white hover:text-black transition-all">
+                  <ArrowUpRight size={16} />
                 </button>
-                <button onClick={handleHardLogout} title="Force Reset Session" className="w-12 h-12 flex items-center justify-center border border-red-500/10 text-red-500/40 hover:bg-red-500 hover:text-white transition-all">
-                  <Power size={18} />
+                <button onClick={handleHardLogout} title="Force Reset Session" className="w-10 h-10 rounded-full flex items-center justify-center border border-red-500/10 text-red-500/40 hover:bg-red-500 hover:text-white transition-all">
+                  <Power size={16} />
                 </button>
               </div>
 
-              <button id="new-link-btn" onClick={() => setShowDepositModal(true)} className="flex items-center gap-3 bg-accent text-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-accent/90 transition-all shadow-[0_0_20px_rgba(0,71,255,0.3)]">
+              <button id="new-link-btn" onClick={() => setShowDepositModal(true)} className="flex items-center gap-3 bg-accent text-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-accent/90 transition-all">
                 <Plus size={16} /> New Safe-Link
               </button>
             </div>

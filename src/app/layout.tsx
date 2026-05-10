@@ -9,7 +9,7 @@ import { ToastProvider } from "@/components/Toast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-main" });
 
-import { Zap, Lock, Shield, Rocket, Globe, ShieldCheck } from "lucide-react";
+import { Zap, Lock, Shield, Rocket, Globe, ShieldCheck, Settings } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function RootLayout({
@@ -129,6 +129,9 @@ export default function RootLayout({
                     >
                       {isDarkMode ? 'LIGHT' : 'DARK'}
                     </button>
+                    <Link href="/settings" title="Profile Settings" className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all">
+                      <Settings size={14} />
+                    </Link>
                   </nav>
                 </header>
                 <main className="flex-grow">
