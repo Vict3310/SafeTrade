@@ -274,6 +274,9 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+              <Link href="/settings" className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-white/10 text-white px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-white/5 transition-all">
+                Settings
+              </Link>
               <button onClick={() => setShowCreateModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-white text-black px-8 py-4 text-[10px] font-extrabold uppercase tracking-widest hover:bg-white/90 transition-all">
                 <Plus size={16} /> New Safe-Link
               </button>
@@ -504,18 +507,6 @@ export default function Dashboard() {
           </div>
         )}
       </AnimatePresence>
-          <div className="mt-40 border-t border-white/5 pt-20">
-            <h3 className="text-[10px] font-bold opacity-30 uppercase tracking-[0.4em] mb-8">System Security</h3>
-            <div className="bg-red-500/5 border border-red-500/10 p-12 flex flex-col lg:flex-row justify-between items-center gap-8">
-              <div className="text-center lg:text-left">
-                <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">Delete Account Data</p>
-                <p className="text-[10px] opacity-40 font-bold uppercase max-w-sm">Permanently wipe your identity and all transaction history from the SafeTrade database.</p>
-              </div>
-              <button onClick={handleWipeData} className="px-8 py-4 border border-red-500/30 text-red-500 text-[9px] font-extrabold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
-                Wipe My Data
-              </button>
-            </div>
-          </div>
         </>
       )}
     </div>
