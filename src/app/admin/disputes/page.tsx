@@ -137,9 +137,24 @@ export default function AdminDisputes() {
           <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-1">Total Volume</p>
           <p className="text-2xl font-extrabold">₦{allDeals.reduce((sum, d) => sum + (d.price_naira || 0), 0).toLocaleString()}</p>
         </div>
-        <div className="bg-accent/10 border border-accent/20 p-6">
-          <p className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1">Realized Revenue</p>
-          <p className="text-2xl font-extrabold text-accent">₦{allDeals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.service_fee || 0), 0).toLocaleString()}</p>
+        <div className="bg-accent/10 border border-accent/20 p-6 relative group overflow-hidden">
+          <div className="relative z-10">
+            <p className="text-[10px] font-bold text-accent uppercase tracking-widest mb-1">Realized Revenue</p>
+            <p className="text-2xl font-extrabold text-accent">₦{allDeals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.service_fee || 0), 0).toLocaleString()}</p>
+            <button 
+              onClick={() => {
+                const amount = allDeals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.service_fee || 0), 0);
+                if (amount <= 0) return showToast("No revenue available to withdraw.", "info");
+                showToast(`Payout of ₦${amount.toLocaleString()} initiated to Admin Bank.`, "success");
+              }}
+              className="mt-4 w-full py-2 bg-accent text-white text-[8px] font-extrabold uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+            >
+              Withdraw Earnings
+            </button>
+          </div>
+          <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Scale size={80} />
+          </div>
         </div>
         <div className="bg-white/5 border border-white/10 p-6">
           <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-1">Locked in Vault</p>
