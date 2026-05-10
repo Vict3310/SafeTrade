@@ -235,20 +235,35 @@ export default function Dashboard() {
         <>
           <div className="flex flex-col lg:flex-row justify-between lg:items-end items-start gap-8 mb-16">
             <div className="flex items-center gap-6">
-              <ConnectButton 
-                client={client} 
-                wallets={wallets} 
-                accountAbstraction={smartAccountConfig}
-              />
+              <div className="relative group">
+                <ConnectButton 
+                  client={client} 
+                  wallets={wallets} 
+                  accountAbstraction={smartAccountConfig}
+                />
+                <div className="absolute -bottom-12 left-0 bg-accent text-white text-[8px] font-bold px-2 py-1 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  Click to Disconnect
+                </div>
+              </div>
               <div>
-                <h2 className="text-3xl lg:text-4xl font-extrabold mb-2 uppercase">VENDOR DASHBOARD</h2>
-                <p className="opacity-40 text-[10px] font-bold tracking-widest uppercase">Manage your secure transactions</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                  <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest">Connected: {address.slice(0,6)}...{address.slice(-4)}</span>
+                </div>
+                <h2 className="text-3xl lg:text-4xl font-extrabold mb-2 uppercase">THE VAULT</h2>
               </div>
             </div>
             <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+              <button onClick={() => setShowCreateModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-white text-black px-8 py-4 text-[10px] font-extrabold uppercase tracking-widest hover:bg-white/90 transition-all">
+                <Plus size={16} /> New Safe-Link
+              </button>
               {address.toLowerCase() === ADMIN_WALLET.toLowerCase() && (
                 <Link href="/admin/disputes" className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-red-500/20 text-red-500 px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
-                  <Shield size={14} /> Admin Hub
+                  <Shield size={14} /> Arbitration Center
+                </Link>
+              )}
+            </div>
+          </div>                  <Shield size={14} /> Admin Hub
                 </Link>
               )}
               <button onClick={() => setShowWithdrawModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-white/20 text-white px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
