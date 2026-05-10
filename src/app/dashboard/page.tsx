@@ -11,8 +11,7 @@ import { usePaystackPayment } from "react-paystack";
 import Link from "next/link";
 import { useToast } from "@/components/Toast";
 import { WhatsAppService } from "@/lib/whatsapp";
-import { defineChain } from "thirdweb";
-import { createWallet } from "thirdweb/wallets";
+import { EXCHANGE_RATE, SERVICE_FEE_PERCENT } from "@/lib/constants";
 import Tour from "@/components/Tour";
 
 import { celoSepoliaTestnet } from "thirdweb/chains";
@@ -54,6 +53,8 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [userName, setUserName] = useState("");
   const [userPhone, setUserPhone] = useState("");
+  const [userBank, setUserBank] = useState("");
+  const [userAccount, setUserAccount] = useState("");
   const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
 
   // REAL On-chain Balance (cUSD on Celo Sepolia)
@@ -64,11 +65,11 @@ export default function Dashboard() {
     // For cUSD, we'd normally pass the token address, but for CELO native:
   });
 
-  const displayBalance = balanceData ? parseFloat(balanceData.displayValue) * 1500 : 0; // Simulated Naira value
+  const displayBalance = balanceData ? parseFloat(balanceData.displayValue) * EXCHANGE_RATE : 0; // Dynamic Naira value
 
   const formatPrice = (naira: number) => {
     if (currency === 'NGN') return `₦${naira.toLocaleString()}`;
-    return `$${(naira / 1500).toFixed(2)}`;
+    return `$${(naira / EXCHANGE_RATE).toFixed(2)}`;
   };
 
   useEffect(() => {
@@ -131,6 +132,8 @@ export default function Dashboard() {
     } else {
       if (data.full_name) setUserName(data.full_name);
       if (data.phone_number) setUserPhone(data.phone_number);
+      if (data.bank_name) setUserBank(data.bank_name);
+      if (data.account_number) setUserAccount(data.account_number);
 
       if (!data.full_name || !data.phone_number || data.full_name.trim() === "" || data.phone_number.trim() === "") {
         setShowOnboarding(true);
@@ -486,7 +489,7 @@ export default function Dashboard() {
 
                 <div className="bg-white/5 p-4 border border-white/10">
                    <p className="text-[8px] font-bold opacity-40 uppercase tracking-[0.2em] mb-1">Destination Bank</p>
-                   <p className="text-[10px] font-bold uppercase">Mock Bank PLC ****4321</p>
+                   <p className="text-[10px] font-bold uppercase">{userBank ? `${userBank} ****${userAccount.slice(-4)}` : "No Bank Configured (Go to Settings)"}</p>
                 </div>
                 
                 <button type="submit" className="w-full bg-accent text-white py-6 text-[10px] font-extrabold uppercase tracking-[0.3em] hover:brightness-110 flex justify-center items-center gap-2">
@@ -528,7 +531,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-2 gap-8">
                   <div>
                     <label className="text-[9px] font-bold opacity-40 uppercase tracking-widest">Naira Value</label>
-                    <input type="number" value={priceNaira} onChange={(e) => { setPriceNaira(e.target.value); setPrice((parseFloat(e.target.value) / 1500).toFixed(4)); }} className="w-full bg-transparent border-b border-white/20 py-4 outline-none focus:border-white text-xl font-bold transition-colors" placeholder="NGN" />
+                    <input type="number" value={priceNaira} onChange={(e) => { setPriceNaira(e.target.value); setPrice((parseFloat(e.target.value) / EXCHANGE_RATE).toFixed(4)); }} className="w-full bg-transparent border-b border-white/20 py-4 outline-none focus:border-white text-xl font-bold transition-colors" placeholder="NGN" />
                   </div>
                   <div>
                     <label className="text-[9px] font-bold opacity-40 uppercase tracking-widest">cUSD Value (Auto-Calc)</label>

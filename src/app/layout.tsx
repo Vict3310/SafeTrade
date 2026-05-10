@@ -9,7 +9,8 @@ import { ToastProvider } from "@/components/Toast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-main" });
 
-import { Zap, Lock, Shield, Rocket, Globe } from "lucide-react";
+import { Zap, Lock, Shield, Rocket, Globe, ShieldCheck } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export default function RootLayout({
   children,
@@ -19,11 +20,34 @@ export default function RootLayout({
   // ... (rest of the component)
   const [mounted, setMounted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [tickerItems, setTickerItems] = useState<any[]>([
+    { icon: <Shield size={10} />, text: "SAFE-VAULT PROTOCOL ACTIVE" },
+    { icon: <Lock size={10} />, text: "VERIFYING GLOBAL NODES" },
+    { icon: <Zap size={10} />, text: "SCANNING FOR NEW LINKS" }
+  ]);
 
   useEffect(() => {
     setMounted(true);
     const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     setIsDarkMode(dark);
+
+    const fetchActivity = async () => {
+      const { data } = await supabase
+        .from('deals')
+        .select('item_name, status, price_naira')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (data && data.length > 0) {
+        const items = data.map(d => ({
+          icon: d.status === 'Released' ? <ShieldCheck size={10} className="text-green-500" /> : <Zap size={10} className="text-accent" />,
+          text: `${d.status === 'Released' ? 'RELEASED' : 'SECURED'}: ${d.item_name.toUpperCase()} (₦${d.price_naira?.toLocaleString() || '0'})`
+        }));
+        setTickerItems(items);
+      }
+    };
+
+    fetchActivity();
 
     // Suppress common browser extension / wallet conflict errors in console
     const originalError = console.error;
@@ -72,26 +96,14 @@ export default function RootLayout({
                 {/* Real-time Activity Ticker */}
                 <div className="w-full bg-accent text-white py-2 overflow-hidden whitespace-nowrap border-b border-white/10">
                   <div className="flex gap-12 animate-[marquee_30s_linear_infinite] px-4">
-                    {[
-                      { icon: <Zap size={10} />, text: "NEW SAFE-LINK SECURED IN IKEJA" },
-                      { icon: <Lock size={10} />, text: "₦250,000 RELEASED TO VENDOR #421" },
-                      { icon: <Shield size={10} />, text: "PROTOCOL AUDIT: 100% INTEGRITY" },
-                      { icon: <Rocket size={10} />, text: "1.2M CELO LOCKED IN THE VAULT" },
-                      { icon: <Globe size={10} />, text: "CROSS-BORDER SETTLEMENT ACTIVE" },
-                    ].map((item, i) => (
+                    {tickerItems.map((item, i) => (
                       <span key={i} className="text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
                         {item.icon} {item.text} <div className="w-1 h-1 bg-white rounded-full"></div>
                       </span>
                     ))}
                     {/* Duplicate for seamless loop */}
-                    {[
-                      { icon: <Zap size={10} />, text: "NEW SAFE-LINK SECURED IN IKEJA" },
-                      { icon: <Lock size={10} />, text: "₦250,000 RELEASED TO VENDOR #421" },
-                      { icon: <Shield size={10} />, text: "PROTOCOL AUDIT: 100% INTEGRITY" },
-                      { icon: <Rocket size={10} />, text: "1.2M CELO LOCKED IN THE VAULT" },
-                      { icon: <Globe size={10} />, text: "CROSS-BORDER SETTLEMENT ACTIVE" },
-                    ].map((item, i) => (
-                      <span key={i} className="text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
+                    {tickerItems.map((item, i) => (
+                      <span key={`dup-${i}`} className="text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
                         {item.icon} {item.text} <div className="w-1 h-1 bg-white rounded-full"></div>
                       </span>
                     ))}

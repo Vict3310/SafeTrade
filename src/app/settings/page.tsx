@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User, Phone, Shield, ArrowLeft, Save, Trash2, CheckCircle } from "lucide-react";
+import { User, Phone, Shield, ArrowLeft, Save, Trash2, CheckCircle, Landmark, CreditCard } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useActiveAccount } from "thirdweb/react";
 import Link from "next/link";
@@ -18,6 +18,8 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<any>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
 
   useEffect(() => {
     if (account?.address) {
@@ -38,6 +40,8 @@ export default function SettingsPage() {
       setProfile(data);
       setName(data.full_name || "");
       setPhone(data.phone_number || "");
+      setBankName(data.bank_name || "");
+      setAccountNumber(data.account_number || "");
     }
     setLoading(false);
   };
@@ -47,7 +51,12 @@ export default function SettingsPage() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ full_name: name, phone_number: phone })
+      .update({ 
+        full_name: name, 
+        phone_number: phone,
+        bank_name: bankName,
+        account_number: accountNumber
+      })
       .ilike('wallet_address', account?.address);
 
     if (!error) {
@@ -132,6 +141,32 @@ export default function SettingsPage() {
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full bg-transparent border-b border-white/10 py-4 pl-8 outline-none focus:border-white transition-colors font-bold"
                     placeholder="+234..."
+                  />
+                </div>
+              <div>
+                <label className="text-[10px] font-bold opacity-40 uppercase tracking-widest block mb-4">Bank Name</label>
+                <div className="relative">
+                  <Landmark size={16} className="absolute left-0 top-4 opacity-20" />
+                  <input 
+                    type="text" 
+                    value={bankName} 
+                    onChange={(e) => setBankName(e.target.value)}
+                    className="w-full bg-transparent border-b border-white/10 py-4 pl-8 outline-none focus:border-white transition-colors font-bold"
+                    placeholder="e.g. GTBank, Zenith"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold opacity-40 uppercase tracking-widest block mb-4">Account Number</label>
+                <div className="relative">
+                  <CreditCard size={16} className="absolute left-0 top-4 opacity-20" />
+                  <input 
+                    type="text" 
+                    value={accountNumber} 
+                    onChange={(e) => setAccountNumber(e.target.value)}
+                    className="w-full bg-transparent border-b border-white/10 py-4 pl-8 outline-none focus:border-white transition-colors font-bold"
+                    placeholder="0123456789"
                   />
                 </div>
               </div>

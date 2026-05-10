@@ -13,6 +13,7 @@ import { defineChain, getContract } from "thirdweb";
 import { createWallet } from "thirdweb/wallets";
 import { useToast } from "@/components/Toast";
 import confetti from "canvas-confetti";
+import { EXCHANGE_RATE, SERVICE_FEE_PERCENT } from "@/lib/constants";
 
 import { celoSepoliaTestnet } from "thirdweb/chains";
 const celoSepolia = celoSepoliaTestnet;
@@ -212,12 +213,12 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
                 <span className="text-xl lg:text-2xl font-extrabold">₦{deal.price_naira?.toLocaleString() || '0'}</span>
               </div>
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-white/10">
-                <span className="font-bold uppercase opacity-80 text-[10px]">Security Fee (1.5%)</span>
-                <span className="text-sm font-bold opacity-50">+ ₦{(deal.price_naira * 0.015).toLocaleString()}</span>
+                <span className="font-bold uppercase opacity-80 text-[10px]">Security Fee ({(SERVICE_FEE_PERCENT * 100).toFixed(1)}%)</span>
+                <span className="text-sm font-bold opacity-50">+ ₦{(deal.price_naira * SERVICE_FEE_PERCENT).toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center pt-2">
                 <span className="font-bold uppercase text-accent text-[12px]">Total Secure Value</span>
-                <span className="text-2xl font-extrabold text-accent">₦{(deal.price_naira * 1.015).toLocaleString()}</span>
+                <span className="text-2xl font-extrabold text-accent">₦{(deal.price_naira * (1 + SERVICE_FEE_PERCENT)).toLocaleString()}</span>
               </div>
             </div>
 
