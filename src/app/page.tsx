@@ -60,7 +60,7 @@ export default function LandingPage() {
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-[100] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col justify-center py-32">
+      <section className="relative min-h-screen flex flex-col justify-center py-20 lg:py-32 px-4 lg:px-0">
         <div className="premium-container relative z-10">
           <div className="grid grid-cols-12 gap-0">
             <div className="col-span-12 lg:col-span-10">
@@ -68,55 +68,55 @@ export default function LandingPage() {
                  <motion.div 
                    initial={{ opacity: 0, x: -20 }}
                    animate={{ opacity: 1, x: 0 }}
-                   className="flex items-center gap-3 bg-accent/10 border border-accent/20 px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.4em] text-accent w-fit mb-12"
+                   className="flex items-center gap-3 bg-accent/10 border border-accent/20 px-4 py-2 text-[8px] lg:text-[10px] font-extrabold uppercase tracking-[0.4em] text-accent w-fit mb-8 lg:mb-12"
                  >
                    <Shield size={12} /> Universal Escrow Infrastructure
                  </motion.div>
               </div>
 
-              <h1 className="hero-text text-[clamp(4rem,15vw,12rem)] font-extrabold leading-[0.8] mb-12 uppercase tracking-tighter">
+              <h1 className="hero-text text-[clamp(2.5rem,12vw,12rem)] font-extrabold leading-[0.8] mb-8 lg:mb-12 uppercase tracking-tighter">
                 TRUST IS <br />
                 <span className="hollow-text">NON-NEGOTIABLE</span>
               </h1>
             </div>
           </div>
 
-          <div className="grid grid-cols-12 gap-12 items-end">
+          <div className="grid grid-cols-12 gap-8 lg:gap-12 items-end">
             <div className="col-span-12 lg:col-span-6">
-              <p className="hero-text text-xl lg:text-2xl font-bold uppercase opacity-60 leading-tight mb-12 max-w-xl">
+              <p className="hero-text text-lg lg:text-2xl font-bold uppercase opacity-60 leading-tight mb-12 max-w-xl">
                 The definitive trust layer for peer-to-peer commerce. <br />
                 Secure high-value transactions with cryptographic certainty.
               </p>
               
-              <div className="hero-text flex flex-wrap gap-6">
+              <div className="hero-text flex flex-wrap gap-4 lg:gap-6">
                 <Link href="/dashboard">
-                  <button className="group relative px-12 py-8 bg-accent text-white font-extrabold uppercase tracking-[0.2em] text-[12px] overflow-hidden transition-all hover:scale-[1.02] active:scale-95">
+                  <button className="group relative px-8 lg:px-12 py-6 lg:py-8 bg-accent text-white font-extrabold uppercase tracking-[0.2em] text-[10px] lg:text-[12px] overflow-hidden transition-all hover:scale-[1.02] active:scale-95">
                     <span className="relative z-10 flex items-center gap-3">
                       Launch Dashboard <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
                     </span>
                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity"></div>
                   </button>
                 </Link>
-                <button className="px-12 py-8 border border-white/20 font-extrabold uppercase tracking-[0.2em] text-[12px] hover:bg-white hover:text-black transition-all">
+                <button className="px-8 lg:px-12 py-6 lg:py-8 border border-white/20 font-extrabold uppercase tracking-[0.2em] text-[10px] lg:text-[12px] hover:bg-white hover:text-black transition-all">
                   The Protocol
                 </button>
               </div>
             </div>
 
             <div className="col-span-12 lg:col-span-6">
-              <div className="hero-text grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/10 border border-white/10">
+              <div className="hero-text grid grid-cols-2 gap-px bg-white/10 border border-white/10">
                  {[
                    { label: "Volume Secured", val: "$4.2M+", icon: <Lock size={14} /> },
                    { label: "Global Users", val: "128K", icon: <Zap size={14} /> },
                    { label: "Active Markets", val: "24", icon: <Globe size={14} /> },
                    { label: "Integrity Score", val: "100%", icon: <Shield size={14} /> }
                  ].map((stat, i) => (
-                   <div key={i} className="bg-primary p-6 lg:p-8 hover:bg-white/[0.02] transition-colors group">
-                      <div className="flex items-center gap-2 text-accent mb-4 opacity-40 group-hover:opacity-100 transition-opacity">
+                   <div key={i} className="bg-primary p-4 lg:p-8 hover:bg-white/[0.02] transition-colors group">
+                      <div className="flex items-center gap-2 text-accent mb-3 lg:mb-4 opacity-40 group-hover:opacity-100 transition-opacity">
                         {stat.icon}
-                        <span className="text-[9px] font-bold uppercase tracking-widest">{stat.label}</span>
+                        <span className="text-[8px] lg:text-[9px] font-bold uppercase tracking-widest">{stat.label}</span>
                       </div>
-                      <p className="text-2xl lg:text-3xl font-extrabold tracking-tighter">{stat.val}</p>
+                      <p className="text-xl lg:text-3xl font-extrabold tracking-tighter">{stat.val}</p>
                    </div>
                  ))}
               </div>
@@ -150,7 +150,7 @@ export default function LandingPage() {
             { num: "04", title: "Release", desc: "Smart contract executes the payout.", icon: <FileText size={24} /> }
           ].map((step, i) => (
             <div key={i} className="bg-primary p-8 lg:p-12 hover:bg-white/[0.02] transition-all group relative overflow-hidden min-h-[220px]">
-              <div className="absolute -right-4 -top-2 text-[60px] lg:text-[120px] font-extrabold hollow-text opacity-5 group-hover:opacity-20 transition-opacity pointer-events-none select-none leading-none">
+              <div className="absolute -right-6 -top-4 text-[90px] lg:text-[120px] font-extrabold hollow-text opacity-5 group-hover:opacity-20 transition-opacity pointer-events-none select-none leading-none">
                 {step.num}
               </div>
               <div className="mb-12 text-accent opacity-50 group-hover:opacity-100 transition-opacity">
