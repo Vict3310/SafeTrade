@@ -104,12 +104,12 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
   };
 
   const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"; // Replace with your wallet
-
   const handleReleaseFunds = async () => {
+    if (!account?.address) return showToast("Wallet not connected.", "error");
     if (dealStatus !== 'Funded') return showToast("CRITICAL ERROR: Funds must be in 'Funded' state before release.", "error");
     
-    const isBuyer = account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase();
-    const isAdmin = account?.address?.toLowerCase() === ADMIN_WALLET.toLowerCase();
+    const isBuyer = account.address.toLowerCase() === deal?.buyer_wallet?.toLowerCase();
+    const isAdmin = account.address.toLowerCase() === ADMIN_WALLET.toLowerCase();
 
     if (!isBuyer && !isAdmin) {
       return showToast("UNAUTHORIZED: Only the authorized buyer or SafeTrade Admin can release these funds.", "error");
