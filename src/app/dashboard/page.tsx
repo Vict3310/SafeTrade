@@ -68,10 +68,33 @@ export default function Dashboard() {
       })
       .subscribe();
 
+    if (account?.address) {
+      syncProfile();
+    }
+
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [account]);
+
+  const syncProfile = async () => {
+    if (!account?.address) return;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('wallet_address', account.address)
+      .maybeSingle();
+
+    if (!data) {
+      await supabase.from('profiles').insert([
+        { 
+          wallet_address: account.address,
+          role: 'client' 
+        }
+      ]);
+    }
+  };
 
   const fetchDeals = async () => {
     setLoading(true);
