@@ -97,14 +97,16 @@ export default function Dashboard() {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('wallet_address', account.address)
+      .ilike('wallet_address', account.address) // CASE-INSENSITIVE MATCH
       .maybeSingle();
+
+    console.log("DEBUG: Profile Data Found:", data);
 
     if (!data) {
       // Create initial profile if it doesn't exist
       await supabase.from('profiles').insert([
         { 
-          wallet_address: account.address,
+          wallet_address: account.address.toLowerCase(),
           role: 'client' 
         }
       ]);
@@ -132,11 +134,13 @@ export default function Dashboard() {
         full_name: userName, 
         phone_number: userPhone 
       })
-      .eq('wallet_address', account?.address);
+      .ilike('wallet_address', account?.address); // CASE-INSENSITIVE MATCH
 
     if (!error) {
-      setShowOnboarding(false);
       alert("Profile verified! Welcome to SafeTrade.");
+      await syncProfile(); // IMMEDIATELY RE-CHECK TO HIDE MODAL
+    } else {
+      console.error("Onboarding Error:", error);
     }
   };
 
@@ -146,7 +150,7 @@ export default function Dashboard() {
     const { data, error } = await supabase
       .from('deals')
       .select('*')
-      .eq('vendor_wallet', account.address)
+      .ilike('vendor_wallet', account.address) // CASE-INSENSITIVE MATCH
       .order('created_at', { ascending: false });
 
     if (!error && data) {
@@ -175,7 +179,7 @@ export default function Dashboard() {
           payout_naira: payout,
           safe_link_id: safeLinkId,
           qr_code_secret: qrSecret,
-          vendor_wallet: address,
+          vendor_wallet: address.toLowerCase(),
           status: 'Pending' 
         }
       ]);

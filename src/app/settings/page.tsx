@@ -29,7 +29,7 @@ export default function SettingsPage() {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('wallet_address', account?.address)
+      .ilike('wallet_address', account?.address) // CASE-INSENSITIVE
       .maybeSingle();
     
     if (data) {
@@ -46,7 +46,7 @@ export default function SettingsPage() {
     const { error } = await supabase
       .from('profiles')
       .update({ full_name: name, phone_number: phone })
-      .eq('wallet_address', account?.address);
+      .ilike('wallet_address', account?.address);
 
     if (!error) {
       alert("Profile updated successfully!");
