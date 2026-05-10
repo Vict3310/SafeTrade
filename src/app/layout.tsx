@@ -28,22 +28,22 @@ export default function RootLayout({
         {mounted && (
           <ThirdwebProvider>
             <div className="app-container min-h-screen flex flex-col">
-              <header className="premium-container py-8 thin-border-bottom flex justify-between items-center">
-                <div className="logo flex flex-col">
+              <header className="premium-container py-6 lg:py-10 thin-border-bottom flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="logo flex flex-col items-center md:items-start text-center md:text-left">
                   <Link href="/">
-                    <h1 className="text-xl font-extrabold tracking-tighter uppercase leading-none cursor-pointer">
+                    <h1 className="text-xl lg:text-2xl font-extrabold tracking-tighter uppercase leading-none cursor-pointer">
                       Safe<span className="hollow-text">Trade</span>
                     </h1>
                   </Link>
                   <span className="text-[10px] opacity-40 font-bold tracking-[0.2em] mt-1 uppercase">High-Trust Escrow</span>
                 </div>
-                <nav className="flex gap-8 items-center">
-                  <Link href="/" className="text-[12px] font-bold opacity-60 hover:opacity-100 transition-opacity">HOME</Link>
-                  <Link href="/dashboard" className="text-[12px] font-bold opacity-60 hover:opacity-100 transition-opacity">DASHBOARD</Link>
-                  <div className="h-4 w-[1px] bg-white/10 mx-2" />
+                <nav className="flex gap-6 lg:gap-10 items-center justify-center">
+                  <Link href="/" className="text-[11px] lg:text-[12px] font-bold opacity-60 hover:opacity-100 transition-opacity">HOME</Link>
+                  <Link href="/dashboard" className="text-[11px] lg:text-[12px] font-bold opacity-60 hover:opacity-100 transition-opacity">DASHBOARD</Link>
+                  <div className="h-4 w-[1px] bg-white/10 mx-1 lg:mx-2" />
                   <button 
                     onClick={() => setIsDarkMode(!isDarkMode)}
-                    className="text-[10px] font-bold border-[0.5px] border-white/20 px-3 py-1 rounded-full hover:bg-white hover:text-black transition-colors"
+                    className="text-[9px] lg:text-[10px] font-bold border-[0.5px] border-white/20 px-3 py-1 rounded-full hover:bg-white hover:text-black transition-colors"
                   >
                     {isDarkMode ? 'LIGHT' : 'DARK'}
                   </button>
@@ -52,8 +52,8 @@ export default function RootLayout({
               <main className="flex-grow">
                 {children}
               </main>
-              <footer className="premium-container py-12 thin-border-top mt-20">
-                <div className="flex justify-between items-end">
+              <footer className="premium-container px-4 md:px-8 py-12 thin-border-top mt-20">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
                   <div className="max-w-md">
                     <h2 className="text-2xl font-extrabold mb-4">THE VAULT</h2>
                     <p className="text-sm opacity-50 leading-relaxed">
