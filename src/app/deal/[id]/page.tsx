@@ -9,7 +9,7 @@ import { inAppWallet } from "thirdweb/wallets";
 import { client } from "@/lib/thirdweb";
 import { usePaystackPayment } from "react-paystack";
 import { WhatsAppService } from "@/lib/whatsapp";
-import { defineChain, getContract } from "thirdweb";
+import { defineChain, getContract, createWallet } from "thirdweb";
 import { useToast } from "@/components/Toast";
 import confetti from "canvas-confetti";
 
@@ -19,6 +19,7 @@ import { useWalletBalance, useSendTransaction } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
 
 const wallets = [
+  createWallet("com.opera"), // MiniPay Support
   inAppWallet({
     auth: { options: ["email", "phone", "google"] },
   }),

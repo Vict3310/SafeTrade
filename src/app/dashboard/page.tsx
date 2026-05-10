@@ -11,7 +11,7 @@ import { usePaystackPayment } from "react-paystack";
 import Link from "next/link";
 import { useToast } from "@/components/Toast";
 import { WhatsAppService } from "@/lib/whatsapp";
-import { defineChain } from "thirdweb";
+import { defineChain, createWallet } from "thirdweb";
 import Tour from "@/components/Tour";
 
 import { celoSepoliaTestnet } from "thirdweb/chains";
@@ -19,6 +19,7 @@ export const celoSepolia = celoSepoliaTestnet;
 import { useWalletBalance } from "thirdweb/react";
 
 const wallets = [
+  createWallet("com.opera"), // MiniPay Support
   inAppWallet({
     auth: {
       options: ["email", "phone", "google"],

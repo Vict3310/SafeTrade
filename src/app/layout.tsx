@@ -50,6 +50,15 @@ export default function RootLayout({
 
   return (
     <html lang="en" className={`${inter.variable} ${isDarkMode ? 'dark-mode' : ''}`}>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0047FF" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="SafeTrade" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+      </head>
       <body className="antialiased">
         {mounted && (
           <ThirdwebProvider>
