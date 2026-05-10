@@ -149,8 +149,8 @@ export default function LandingPage() {
             { num: "03", title: "Verify", desc: "Physical or digital fulfillment verified.", icon: <CheckCircle2 size={24} /> },
             { num: "04", title: "Release", desc: "Smart contract executes the payout.", icon: <FileText size={24} /> }
           ].map((step, i) => (
-            <div key={i} className="bg-primary p-12 hover:bg-white/[0.02] transition-all group relative overflow-hidden">
-              <div className="absolute -right-8 -top-8 text-[120px] font-extrabold hollow-text opacity-10 group-hover:opacity-30 transition-opacity">
+            <div key={i} className="bg-primary p-8 lg:p-12 hover:bg-white/[0.02] transition-all group relative overflow-hidden">
+              <div className="absolute -right-4 -top-4 text-[80px] lg:text-[120px] font-extrabold hollow-text opacity-5 group-hover:opacity-20 transition-opacity pointer-events-none select-none">
                 {step.num}
               </div>
               <div className="mb-12 text-accent opacity-50 group-hover:opacity-100 transition-opacity">
