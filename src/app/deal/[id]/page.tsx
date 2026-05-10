@@ -8,6 +8,7 @@ import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { inAppWallet } from "thirdweb/wallets";
 import { client } from "@/lib/thirdweb";
 import { usePaystackPayment } from "react-paystack";
+import { WhatsAppService } from "@/lib/whatsapp";
 import { defineChain, getContract } from "thirdweb";
 import { createWallet } from "thirdweb/wallets";
 import { useToast } from "@/components/Toast";
