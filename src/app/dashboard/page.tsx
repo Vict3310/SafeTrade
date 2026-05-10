@@ -11,6 +11,16 @@ import { usePaystackPayment } from "react-paystack";
 import Link from "next/link";
 import { WhatsAppService } from "@/lib/whatsapp";
 import { defineChain } from "thirdweb";
+
+export const celoSepolia = defineChain({
+  id: 44787,
+  rpc: "https://alfajores-forno.celo-testnet.org",
+  nativeCurrency: {
+    name: "CELO",
+    symbol: "CELO",
+    decimals: 18,
+  },
+});
 import { useWalletBalance } from "thirdweb/react";
 
 const wallets = [
@@ -25,7 +35,7 @@ const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"; // Replace wi
 
 // Account Abstraction Config for Gasless Transactions
 const smartAccountConfig = {
-  chain: defineChain(44787), // Celo Sepolia
+  chain: celoSepolia, // Celo Sepolia
   sponsorGas: true,
 };
 
@@ -47,7 +57,7 @@ export default function Dashboard() {
   // REAL On-chain Balance (cUSD on Celo Sepolia)
   const { data: balanceData, isLoading: isBalanceLoading } = useWalletBalance({
     client,
-    chain: defineChain(44787),
+    chain: celoSepolia,
     address: account?.address,
     // For cUSD, we'd normally pass the token address, but for CELO native:
   });

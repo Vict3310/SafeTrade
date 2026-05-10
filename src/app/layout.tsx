@@ -23,15 +23,27 @@ export default function RootLayout({
 
     // Suppress common browser extension / wallet conflict errors in console
     const originalError = console.error;
-    console.error = (...args) => {
+    const originalWarn = console.warn;
+    
+    const filter = (args: any[], originalFn: Function) => {
       const msg = args[0]?.toString() || "";
       if (
         msg.includes("ethereum") || 
         msg.includes("extension") || 
         msg.includes("MetaMask") ||
-        msg.includes("runtime.lastError")
+        msg.includes("runtime.lastError") ||
+        msg.includes("Cross-Origin-Opener-Policy") ||
+        msg.includes("thirdweb.com/v1/chains/44787")
       ) return;
-      originalError.apply(console, args);
+      originalFn.apply(console, args);
+    };
+
+    console.error = (...args) => filter(args, originalError);
+    console.warn = (...args) => filter(args, originalWarn);
+    
+    window.onerror = (message) => {
+      if (message.toString().includes("ethereum")) return true;
+      return false;
     };
   }, []);
 

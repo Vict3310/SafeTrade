@@ -10,6 +10,16 @@ import { client } from "@/lib/thirdweb";
 import { usePaystackPayment } from "react-paystack";
 import { WhatsAppService } from "@/lib/whatsapp";
 import { defineChain, getContract } from "thirdweb";
+
+const celoSepolia = defineChain({
+  id: 44787,
+  rpc: "https://alfajores-forno.celo-testnet.org",
+  nativeCurrency: {
+    name: "CELO",
+    symbol: "CELO",
+    decimals: 18,
+  },
+});
 import { useWalletBalance, useSendTransaction } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
 
@@ -21,7 +31,7 @@ const wallets = [
 
 // Account Abstraction Config
 const smartAccountConfig = {
-  chain: defineChain(44787), // Celo Sepolia
+  chain: celoSepolia,
   sponsorGas: true,
 };
 
