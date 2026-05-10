@@ -94,29 +94,33 @@ export default function Dashboard() {
     }
 
     setIsProfileLoading(true);
+    const cleanAddress = account.address.trim().toLowerCase();
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .ilike('wallet_address', account.address) // CASE-INSENSITIVE MATCH
+      .ilike('wallet_address', cleanAddress)
       .maybeSingle();
 
-    console.log("DEBUG: Profile Data Found:", data);
-
     if (!data) {
-      // Create initial profile if it doesn't exist
-      await supabase.from('profiles').insert([
+      const { error: insertError } = await supabase.from('profiles').insert([
         { 
-          wallet_address: account.address.toLowerCase(),
+          wallet_address: cleanAddress,
           role: 'client' 
         }
       ]);
+
+      if (insertError && (insertError.code === '23505' || insertError.message.includes('already exists'))) {
+        setShowOnboarding(false); 
+        setIsProfileLoading(false);
+        return;
+      }
+      
       setShowOnboarding(true);
     } else {
-      // Pre-fill existing data to verify it was saved
       if (data.full_name) setUserName(data.full_name);
       if (data.phone_number) setUserPhone(data.phone_number);
 
-      // Only show onboarding if fields are empty
       if (!data.full_name || !data.phone_number || data.full_name.trim() === "" || data.phone_number.trim() === "") {
         setShowOnboarding(true);
       } else {
