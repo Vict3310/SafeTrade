@@ -213,6 +213,20 @@ export default function Dashboard() {
     alert(`Withdrawal of ₦${amount.toLocaleString()} initiated! In production, this would trigger a cUSD -> Naira bank transfer.`);
   };
 
+  const handleWipeData = async () => {
+    if (!account?.address) return;
+    if (!confirm("CRITICAL WARNING: This will permanently delete your profile and all your Safe-Links. This cannot be undone. Proceed?")) return;
+
+    setLoading(true);
+    // Delete deals
+    await supabase.from('deals').delete().eq('vendor_wallet', account.address);
+    // Delete profile
+    await supabase.from('profiles').delete().eq('wallet_address', account.address);
+    
+    alert("ACCOUNT WIPED. Resetting session...");
+    handleHardLogout();
+  };
+
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (!confirm("Delete this deal?")) return;
@@ -487,6 +501,18 @@ export default function Dashboard() {
           </div>
         )}
       </AnimatePresence>
+          <div className="mt-40 border-t border-white/5 pt-20">
+            <h3 className="text-[10px] font-bold opacity-30 uppercase tracking-[0.4em] mb-8">System Security</h3>
+            <div className="bg-red-500/5 border border-red-500/10 p-12 flex flex-col lg:flex-row justify-between items-center gap-8">
+              <div className="text-center lg:text-left">
+                <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">Delete Account Data</p>
+                <p className="text-[10px] opacity-40 font-bold uppercase max-w-sm">Permanently wipe your identity and all transaction history from the SafeTrade database.</p>
+              </div>
+              <button onClick={handleWipeData} className="px-8 py-4 border border-red-500/30 text-red-500 text-[9px] font-extrabold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
+                Wipe My Data
+              </button>
+            </div>
+          </div>
         </>
       )}
     </div>
