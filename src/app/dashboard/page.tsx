@@ -309,11 +309,17 @@ export default function Dashboard() {
         </div>
         <div className="col-span-1 lg:col-span-4 p-6 lg:p-8 border border-white/10">
           <p className="text-[10px] font-bold opacity-30 tracking-[0.2em] mb-2 uppercase">Active Deals</p>
-          <h3 className="text-4xl lg:text-5xl font-extrabold tracking-tighter">08</h3>
+          <h3 className="text-4xl lg:text-5xl font-extrabold tracking-tighter">
+            {deals.filter(d => d.status === 'Funded').length.toString().padStart(2, '0')}
+          </h3>
         </div>
         <div className="col-span-1 lg:col-span-4 p-6 lg:p-8 border border-white/10">
           <p className="text-[10px] font-bold opacity-30 tracking-[0.2em] mb-2 uppercase">Success Rate</p>
-          <h3 className="text-4xl lg:text-5xl font-extrabold tracking-tighter">98.2%</h3>
+          <h3 className="text-4xl lg:text-5xl font-extrabold tracking-tighter">
+            {deals.length > 0 
+              ? Math.round((deals.filter(d => d.status === 'Released').length / deals.length) * 100) 
+              : "100"}%
+          </h3>
         </div>
       </div>
 
