@@ -88,6 +88,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="KOVA" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+        <meta name="talentapp:project_verification" content="5550063fad4ac0b5a97259dad85966471ef08d7838b3d1e60d4a8ac6c431e330e01dbdbcc23ba6185107f8e34c7e7f6ada7502fcd044c83462533b7b5fdcdd36" />
         <title>KOVA | THE VAULT PROTOCOL</title>
       </head>
       <body className="antialiased">
