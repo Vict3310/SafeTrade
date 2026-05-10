@@ -40,6 +40,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
   const { mutate: sendTransaction } = useSendTransaction();
   
   const [deal, setDeal] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [dealStatus, setDealStatus] = useState("Pending"); 
   const [showDisputeModal, setShowDisputeModal] = useState(false);
@@ -48,11 +49,21 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
 
   const fetchDeal = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('deals').select('*').eq('safe_link_id', id).single();
-    if (!error && data) { 
-      setDeal(data); 
-      setDealStatus(data.status); 
+    const { data: dealData } = await supabase.from('deals').select('*').eq('safe_link_id', id).single();
+    if (dealData) { 
+      setDeal(dealData); 
+      setDealStatus(dealData.status); 
     }
+
+    if (account?.address) {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .ilike('wallet_address', account.address)
+        .maybeSingle();
+      if (profileData) setProfile(profileData);
+    }
+
     setLoading(false);
   };
 
@@ -110,7 +121,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
     if (dealStatus !== 'Funded') return showToast("CRITICAL ERROR: Funds must be in 'Funded' state before release.", "error");
     
     const isBuyer = account.address.toLowerCase() === deal?.buyer_wallet?.toLowerCase();
-    const isAdmin = account.address.toLowerCase() === ADMIN_WALLET.toLowerCase();
+    const isAdmin = account.address.toLowerCase() === ADMIN_WALLET.toLowerCase() || profile?.role === 'admin';
 
     if (!isBuyer && !isAdmin) {
       return showToast("UNAUTHORIZED: Only the authorized buyer or KOVA Admin can release these funds.", "error");
@@ -277,7 +288,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
                     <div className="text-center pt-4">
                       <p className="text-xs font-bold opacity-60 uppercase tracking-widest mb-6 text-accent">Funds Secured in Vault</p>
                       
-                      {account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase() ? (
+                      {(account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase() || profile?.role === 'admin') && (
                         <button 
                           onClick={handleReleaseFunds} 
                           disabled={txLoading}
@@ -288,15 +299,34 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
                           ) : (
                             <Unlock size={14} />
                           )}
-                          {txLoading ? "PROCESSING AUTH..." : "APPROVE & RELEASE FUNDS"}
+                          {txLoading ? "PROCESSING AUTH..." : profile?.role === 'admin' ? "ADMIN: OVERRIDE & RELEASE" : "APPROVE & RELEASE FUNDS"}
                         </button>
-                      ) : account?.address?.toLowerCase() === deal?.vendor_wallet?.toLowerCase() ? (
+                      )}
+
+                      {profile?.role === 'admin' && (
+                        <button 
+                          onClick={async () => {
+                            if (confirm("ADMIN OVERRIDE: Are you sure you want to refund this buyer?")) {
+                              const { error } = await supabase.from('deals').update({ status: 'Refunded' }).eq('safe_link_id', id);
+                              if (!error) {
+                                setDealStatus('Refunded');
+                                showToast("ADMIN REFUND COMPLETE", "success");
+                              }
+                            }
+                          }}
+                          className="w-full border border-red-500 text-red-500 py-6 text-[10px] font-extrabold uppercase tracking-[0.3em] hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center gap-2 mb-4"
+                        >
+                          <AlertCircle size={14} /> ADMIN: OVERRIDE & REFUND
+                        </button>
+                      )}
+
+                      {account?.address?.toLowerCase() === deal?.vendor_wallet?.toLowerCase() && profile?.role !== 'admin' && (
                         <div className="bg-accent/5 border border-accent/20 p-6 mb-6">
                            <Clock size={24} className="mx-auto mb-3 text-accent opacity-50" />
                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-accent">Waiting for Buyer Approval</p>
                            <p className="text-[9px] opacity-40 font-bold uppercase mt-2 text-white">Funds are safely locked in the Vault</p>
                         </div>
-                      ) : null}
+                      )}
 
                       <button 
                         onClick={() => WhatsAppService.sendUpdate('funded', { itemName: deal.item_name, amount: deal.price_naira, id: deal.safe_link_id })}

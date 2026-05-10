@@ -110,12 +110,19 @@ export default function Dashboard() {
     setIsProfileLoading(true);
     const cleanAddress = account.address.trim().toLowerCase();
     
+    // First, try to fetch the existing profile to see if they already have a special role (like Admin)
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('*')
+      .ilike('wallet_address', cleanAddress)
+      .maybeSingle();
+
     const { data: profile, error: upsertError } = await supabase
       .from('profiles')
       .upsert({ 
         wallet_address: cleanAddress, 
-        full_name: userName || '',
-        role: 'client'
+        full_name: existingProfile?.full_name || userName || '',
+        role: existingProfile?.role || 'client' // PRESERVE ADMIN ROLE
       }, { 
         onConflict: 'wallet_address',
         ignoreDuplicates: false 
@@ -337,7 +344,8 @@ export default function Dashboard() {
 
               {/* Action Icons */}
               <div className="flex gap-2">
-                {address.toLowerCase() === ADMIN_WALLET.toLowerCase() && (
+                {/* Admin Access (Dynamic & Hardcoded) */}
+                {(profile?.role === 'admin' || address.toLowerCase() === ADMIN_WALLET.toLowerCase()) && (
                   <Link href="/admin/disputes" title="Arbitration Center" className="w-10 h-10 rounded-full flex items-center justify-center border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
                     <Shield size={16} />
                   </Link>
