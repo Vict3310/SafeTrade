@@ -14,7 +14,7 @@ import { defineChain } from "thirdweb";
 
 export const celoSepolia = defineChain({
   id: 44787,
-  rpc: "https://alfajores-forno.celo-testnet.org",
+  rpc: "https://44787.rpc.thirdweb.com", // Thirdweb optimized RPC
   nativeCurrency: {
     name: "CELO",
     symbol: "CELO",
