@@ -13,6 +13,8 @@ import { useToast } from "@/components/Toast";
 import { WhatsAppService } from "@/lib/whatsapp";
 import { EXCHANGE_RATE, SERVICE_FEE_PERCENT } from "@/lib/constants";
 import Tour from "@/components/Tour";
+import { defineChain } from "thirdweb";
+import { createWallet } from "thirdweb/wallets";
 
 import { celoSepoliaTestnet } from "thirdweb/chains";
 export const celoSepolia = celoSepoliaTestnet;
