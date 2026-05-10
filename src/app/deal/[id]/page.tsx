@@ -251,7 +251,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
                 <div className="flex items-center gap-4 py-4 px-6 bg-white/5 border border-white/10 mb-4">
                   <div className="text-left">
                     <p className="text-[9px] font-bold opacity-40 uppercase">Connected Wallet</p>
-                    <p className="text-[10px] font-extrabold truncate w-40">{account.address}</p>
+                    <p className="text-[10px] font-extrabold truncate w-32">{account.address.slice(0, 6)}...{account.address.slice(-4)}</p>
                   </div>
                   <div className="ml-auto">
                     <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>

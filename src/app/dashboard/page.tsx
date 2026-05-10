@@ -316,7 +316,7 @@ export default function Dashboard() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                  <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest">Connected: {address}</span>
+                  <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest">Connected: {address.slice(0, 6)}...{address.slice(-4)}</span>
                 </div>
                 <h2 className="text-3xl lg:text-4xl font-extrabold mb-2 uppercase tracking-tighter">THE <span className="hollow-text">VAULT</span></h2>
                 <button onClick={handleHardLogout} className="text-[8px] font-bold opacity-30 hover:opacity-100 uppercase tracking-widest underline decoration-accent underline-offset-4">Force Session Reset</button>
