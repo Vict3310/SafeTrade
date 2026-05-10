@@ -343,7 +343,10 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="font-extrabold uppercase tracking-tight">{deal.item_name}</p>
-                <p className="text-[10px] opacity-40 uppercase tracking-widest">ID: {deal.safe_link_id}</p>
+                <div className="flex items-center gap-2">
+                   <p className="text-[10px] opacity-40 uppercase tracking-widest">ID: {deal.safe_link_id}</p>
+                   <span className="text-[7px] px-1 bg-white/5 border border-white/10 opacity-30 font-mono">OWNER: {deal.vendor_wallet?.slice(0,10)}...</span>
+                </div>
               </div>
             </div>
             <div className="col-span-1 lg:col-span-2 flex items-center lg:justify-center justify-between font-bold">
