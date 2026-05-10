@@ -285,18 +285,11 @@ export default function Dashboard() {
                   <Shield size={14} /> Arbitration Center
                 </Link>
               )}
-            </div>
-          </div>                  <Shield size={14} /> Admin Hub
-                </Link>
-              )}
               <button onClick={() => setShowWithdrawModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-white/20 text-white px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
                 <ArrowUpRight size={14} /> Withdraw
               </button>
               <button onClick={() => setShowDepositModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-white/20 text-white px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
                 <ArrowDownLeft size={14} /> Deposit
-              </button>
-              <button onClick={() => setShowCreateModal(true)} className="w-full lg:w-auto flex items-center justify-center gap-3 bg-accent text-white px-8 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:brightness-110 transition-all">
-                <Plus size={14} /> Create Safe-Link
               </button>
             </div>
           </div>
