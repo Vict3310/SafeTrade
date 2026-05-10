@@ -20,6 +20,19 @@ export default function RootLayout({
     setMounted(true);
     const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     setIsDarkMode(dark);
+
+    // Suppress common browser extension / wallet conflict errors in console
+    const originalError = console.error;
+    console.error = (...args) => {
+      const msg = args[0]?.toString() || "";
+      if (
+        msg.includes("ethereum") || 
+        msg.includes("extension") || 
+        msg.includes("MetaMask") ||
+        msg.includes("runtime.lastError")
+      ) return;
+      originalError.apply(console, args);
+    };
   }, []);
 
   return (
