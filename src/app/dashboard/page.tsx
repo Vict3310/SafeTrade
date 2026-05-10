@@ -110,37 +110,29 @@ export default function Dashboard() {
     setIsProfileLoading(true);
     const cleanAddress = account.address.trim().toLowerCase();
     
-    const { data, error } = await supabase
+    const { data: profile, error: upsertError } = await supabase
       .from('profiles')
-      .select('*')
-      .ilike('wallet_address', cleanAddress)
+      .upsert({ 
+        wallet_address: cleanAddress, 
+        full_name: userName || '',
+        role: 'client'
+      }, { 
+        onConflict: 'wallet_address',
+        ignoreDuplicates: false 
+      })
+      .select()
       .maybeSingle();
 
-    if (!data) {
-      const { error: insertError } = await supabase.from('profiles').insert([
-        { 
-          wallet_address: cleanAddress,
-          role: 'client' 
-        }
-      ]);
-
-      if (insertError && (insertError.code === '23505' || insertError.message.includes('already exists'))) {
-        setShowOnboarding(false); 
-        setIsProfileLoading(false);
-        return;
-      }
-      
-      setShowOnboarding(true);
-    } else {
-      if (data.full_name) setUserName(data.full_name);
-      if (data.phone_number) setUserPhone(data.phone_number);
-      if (data.bank_name) setUserBank(data.bank_name);
-      if (data.account_number) setUserAccount(data.account_number);
-
-      if (!data.full_name || !data.phone_number || data.full_name.trim() === "" || data.phone_number.trim() === "") {
-        setShowOnboarding(true);
-      } else {
+    if (upsertError) {
+      console.error("Profile Sync Error:", upsertError);
+    } else if (profile) {
+      setProfile(profile);
+      if (profile.full_name) {
+        setUserName(profile.full_name);
+        setUserPhone(profile.phone_number || "");
         setShowOnboarding(false);
+      } else {
+        setShowOnboarding(true);
       }
     }
     setIsProfileLoading(false);
@@ -159,7 +151,7 @@ export default function Dashboard() {
       .ilike('wallet_address', account.address); // Guaranteed string here
 
     if (!error) {
-      showToast("Profile verified! Welcome to SafeTrade.", "success");
+      showToast("Profile verified! Welcome to KOVA.", "success");
       await syncProfile(); // IMMEDIATELY RE-CHECK TO HIDE MODAL
     } else {
       console.error("Onboarding Error:", error);
@@ -220,7 +212,7 @@ export default function Dashboard() {
 
   const config = {
     reference: (new Date()).getTime().toString(),
-    email: "user@safetrade.com", // Mock email for testing
+    email: "user@kova.com", // Mock email for testing
     amount: (parseFloat(depositAmount) || 0) * 100, // Amount is in kobo
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "",
   };
@@ -265,7 +257,7 @@ export default function Dashboard() {
       setLoading(true);
       
       // DESTRUCTION CHALLENGE: Sign to authorize data wipe
-      const message = `AUTHORIZE DESTRUCTION: I, ${account.address}, authorize the permanent deletion of my SafeTrade profile and all associated data. Timestamp: ${Date.now()}`;
+      const message = `AUTHORIZE DESTRUCTION: I, ${account.address}, authorize the permanent deletion of my KOVA profile and all associated data. Timestamp: ${Date.now()}`;
       await (account as any).signMessage({ message });
 
       // Delete deals
@@ -295,7 +287,7 @@ export default function Dashboard() {
       {!account ? (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <Wallet size={64} className="mb-8 opacity-20" />
-          <h2 className="text-5xl font-extrabold uppercase tracking-tighter mb-4">ACCESS <span className="hollow-text">VAULT</span></h2>
+          <h2 className="text-5xl font-extrabold uppercase tracking-tighter mb-4">ACCESS <span className="hollow-text">THE VAULT</span></h2>
           <p className="opacity-50 text-sm font-bold tracking-widest uppercase mb-12 max-w-md">
             Sign in with your email or phone number. A secure Celo wallet will be generated automatically.
           </p>
@@ -322,7 +314,7 @@ export default function Dashboard() {
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                   <span className="text-[9px] font-black opacity-30 uppercase tracking-[0.2em]">Live Connection: {address.slice(0, 6)}...{address.slice(-4)}</span>
                 </div>
-                <h2 className="text-4xl font-black uppercase tracking-tighter leading-none mb-2">THE <span className="hollow-text">VAULT</span></h2>
+                <h2 className="text-4xl font-black uppercase tracking-tighter leading-none mb-2">KOVA <span className="hollow-text">THE VAULT</span></h2>
               </div>
             </div>
 
@@ -436,6 +428,7 @@ export default function Dashboard() {
                       {deal.status === 'Funded' && <div className="absolute inset-0 bg-accent rounded-full animate-ping opacity-20"></div>}
                     </div>
                     <div>
+                      <span className="text-[10px] opacity-40 font-bold tracking-[0.2em] mt-1 uppercase">THE VAULT PROTOCOL</span>
                       <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-1">ID: {deal.safe_link_id.slice(0,8)}</p>
                       <h4 className="text-lg font-extrabold uppercase group-hover:text-accent transition-colors">{deal.item_name}</h4>
                     </div>
@@ -547,7 +540,7 @@ export default function Dashboard() {
                 {priceNaira && (
                   <div className="bg-accent/5 border border-accent/20 p-6 space-y-2">
                     <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
-                      <span className="opacity-40">SafeTrade Fee (1.5%)</span>
+                      <span className="opacity-40">KOVA<span className="hollow-text">.</span> Fee (1.5%)</span>
                       <span className="text-red-400">- ₦{(parseFloat(priceNaira) * 0.015).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-xs font-extrabold uppercase tracking-widest pt-2 border-t border-accent/10">

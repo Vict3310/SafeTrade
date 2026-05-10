@@ -71,6 +71,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
   const config = {
     reference: (new Date()).getTime().toString(),
     email: "buyer@safetrade.com", 
+    email: "buyer@kova.com", 
     amount: (deal?.price_naira || 0) * 100, 
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "",
   };
@@ -112,7 +113,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
     const isAdmin = account.address.toLowerCase() === ADMIN_WALLET.toLowerCase();
 
     if (!isBuyer && !isAdmin) {
-      return showToast("UNAUTHORIZED: Only the authorized buyer or SafeTrade Admin can release these funds.", "error");
+      return showToast("UNAUTHORIZED: Only the authorized buyer or KOVA Admin can release these funds.", "error");
     }
 
     if (!confirm("Are you sure you want to release the funds to the vendor? This action is irreversible. You will be asked to sign a message to authorize this.")) return;
@@ -204,7 +205,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
             <h1 className="text-4xl lg:text-6xl font-extrabold mb-4 uppercase leading-none">SECURE YOUR <br /><span className="hollow-text">{deal.item_name}</span></h1>
             <div className="flex items-center gap-4 mb-12">
               <ShieldCheck size={48} className="text-green-500 opacity-20" />
-              <div><p className="text-[10px] font-bold opacity-40 uppercase">Vendor Protection</p><p className="font-bold uppercase">SafeTrade Guarantee</p></div>
+              <div><p className="text-[10px] font-bold opacity-40 uppercase">Vendor Protection</p><p className="font-bold uppercase">KOVA Guarantee</p></div>
             </div>
             
             <div className="bg-white/5 border border-white/10 p-6 lg:p-8 mb-12">
@@ -252,7 +253,12 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
                 
                 <div className="flex items-center gap-4 py-4 px-6 bg-white/5 border border-white/10 mb-4">
                   <div className="text-left">
-                    <p className="text-[9px] font-bold opacity-40 uppercase">Connected Wallet</p>
+                    <Link href="/">
+                      <h1 className="text-2xl font-black tracking-tighter uppercase leading-none cursor-pointer">
+                        KOVA<span className="hollow-text">.</span>
+                      </h1>
+                    </Link>
+                    <p className="text-[9px] font-bold opacity-30 uppercase tracking-[0.2em] mt-1">THE VAULT PROTOCOL</p>
                     <p className="text-[10px] font-extrabold truncate w-32">{account.address.slice(0, 6)}...{account.address.slice(-4)}</p>
                   </div>
                   <div className="ml-auto">

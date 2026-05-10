@@ -113,11 +113,11 @@ export default function RootLayout({
                 <header className="premium-container py-6 lg:py-10 thin-border-bottom flex flex-col md:flex-row justify-between items-center gap-6">
                   <div className="logo flex flex-col items-center md:items-start text-center md:text-left">
                     <Link href="/">
-                      <h1 className="text-xl lg:text-2xl font-extrabold tracking-tighter uppercase leading-none cursor-pointer">
-                        Safe<span className="hollow-text">Trade</span>
+                      <h1 className="text-2xl font-black tracking-tighter uppercase leading-none cursor-pointer">
+                        KOVA<span className="hollow-text">.</span>
                       </h1>
                     </Link>
-                    <span className="text-[10px] opacity-40 font-bold tracking-[0.2em] mt-1 uppercase">High-Trust Escrow</span>
+                    <p className="text-[9px] font-bold opacity-30 uppercase tracking-[0.2em] mt-1">THE VAULT PROTOCOL</p>
                   </div>
                   <nav className="flex gap-6 lg:gap-10 items-center justify-center">
                     <Link href="/" className="text-[11px] lg:text-[12px] font-bold opacity-60 hover:opacity-100 transition-opacity">HOME</Link>
@@ -143,17 +143,17 @@ export default function RootLayout({
                       <div className="flex gap-4 mb-6 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
                         <div className="flex items-center gap-2 text-[8px] font-bold border border-white/20 px-2 py-1">🛡️ SSL SECURED</div>
                         <div className="flex items-center gap-2 text-[8px] font-bold border border-white/20 px-2 py-1">⛓️ CELO NETWORK</div>
-                        <div className="flex items-center gap-2 text-[8px] font-bold border border-white/20 px-2 py-1">🔒 SAFE-VAULT v1</div>
+                        <div className="flex items-center gap-2 text-[8px] font-bold border border-white/20 px-2 py-1">🔒 KOVA VAULT v1</div>
                       </div>
-                      <h2 className="text-2xl font-extrabold mb-4">THE VAULT</h2>
+                      <h2 className="text-2xl font-extrabold">KOVA <span className="hollow-text">THE VAULT</span></h2>
                       <p className="text-sm opacity-50 leading-relaxed">
-                        SafeTrade bridges the trust gap in high-activity markets using smart contract technology. 
+                        KOVA bridges the trust gap in high-activity markets using smart contract technology. 
                         Securing transactions between vendors and buyers globally.
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] font-bold opacity-30 mb-2 uppercase">Protocol Version 1.0.0</p>
-                      <p className="text-[10px] font-bold opacity-30 uppercase">© 2024 SAFETRADE LABS</p>
+                      <p className="text-[10px] font-bold opacity-30 uppercase">© 2024 KOVA LABS</p>
                     </div>
                   </div>
                 </footer>

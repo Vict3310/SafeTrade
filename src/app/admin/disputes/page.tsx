@@ -98,7 +98,7 @@ export default function AdminDisputes() {
       .eq("id", selectedDispute.id);
 
     if (!dealError && !disputeError) {
-      showToast(`Dispute resolved: ${status === "Released" ? "Funds released to Vendor" : "Funds refunded to Buyer"}`, "success");
+      showToast(`Dispute resolved: ${status === "Released" ? "Funds released via KOVA" : "Funds refunded to Buyer"}`, "success");
       setSelectedDispute(null);
       setAdminNotes("");
       fetchDisputes();
