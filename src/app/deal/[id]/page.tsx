@@ -95,8 +95,18 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
     });
   };
 
+  const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"; // Replace with your wallet
+
   const handleReleaseFunds = async () => {
     if (dealStatus !== 'Funded') return alert("CRITICAL ERROR: Funds must be in 'Funded' state before release.");
+    
+    const isBuyer = account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase();
+    const isAdmin = account?.address?.toLowerCase() === ADMIN_WALLET.toLowerCase();
+
+    if (!isBuyer && !isAdmin) {
+      return alert("UNAUTHORIZED: Only the authorized buyer or SafeTrade Admin can release these funds.");
+    }
+
     if (!confirm("Are you sure you want to release the funds to the vendor? This action is irreversible.")) return;
     
     const { error } = await supabase.from('deals').update({ status: 'Released' }).eq('safe_link_id', id);
@@ -210,9 +220,17 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
                     <div className="text-center pt-4">
                       <p className="text-xs font-bold opacity-60 uppercase tracking-widest mb-6 text-accent">Funds Secured in Vault</p>
                       
-                      <button onClick={handleReleaseFunds} className="w-full bg-green-600 text-white py-6 text-[10px] font-extrabold uppercase tracking-[0.3em] hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4">
-                        <Unlock size={14} /> APPROVE & RELEASE FUNDS
-                      </button>
+                      {account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase() || account?.address?.toLowerCase() === ADMIN_WALLET.toLowerCase() ? (
+                        <button onClick={handleReleaseFunds} className="w-full bg-green-600 text-white py-6 text-[10px] font-extrabold uppercase tracking-[0.3em] hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4">
+                          <Unlock size={14} /> APPROVE & RELEASE FUNDS
+                        </button>
+                      ) : account?.address?.toLowerCase() === deal?.vendor_wallet?.toLowerCase() ? (
+                        <div className="bg-accent/5 border border-accent/20 p-6 mb-6">
+                           <Clock size={24} className="mx-auto mb-3 text-accent opacity-50" />
+                           <p className="text-[10px] font-extrabold uppercase tracking-widest text-accent">Waiting for Buyer Approval</p>
+                           <p className="text-[9px] opacity-40 font-bold uppercase mt-2 text-white">Funds are safely locked in the Vault</p>
+                        </div>
+                      ) : null}
 
                       <button 
                         onClick={() => WhatsAppService.sendUpdate('funded', { itemName: deal.item_name, amount: deal.price_naira, id: deal.safe_link_id })}
@@ -221,9 +239,11 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
                         <ExternalLink size={14} /> NOTIFY VENDOR ON WHATSAPP
                       </button>
 
-                      <button onClick={() => setShowDisputeModal(true)} className="w-full border border-red-500/30 text-red-500 py-4 text-[10px] font-extrabold uppercase hover:bg-red-500/10 transition-colors flex items-center justify-center gap-2">
-                        <AlertCircle size={14} /> RAISE DISPUTE
-                      </button>
+                      {(account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase() || account?.address?.toLowerCase() === ADMIN_WALLET.toLowerCase()) && (
+                        <button onClick={() => setShowDisputeModal(true)} className="w-full border border-red-500/30 text-red-500 py-4 text-[10px] font-extrabold uppercase hover:bg-red-500/10 transition-colors flex items-center justify-center gap-2">
+                          <AlertCircle size={14} /> RAISE DISPUTE
+                        </button>
+                      )}
                     </div>
                   )}
 
