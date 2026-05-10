@@ -44,6 +44,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
   const [dealStatus, setDealStatus] = useState("Pending"); 
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [disputeReason, setDisputeReason] = useState("");
+  const [txLoading, setTxLoading] = useState(false);
 
   const fetchDeal = async () => {
     setLoading(true);
@@ -271,8 +272,17 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
                       <p className="text-xs font-bold opacity-60 uppercase tracking-widest mb-6 text-accent">Funds Secured in Vault</p>
                       
                       {account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase() ? (
-                        <button onClick={handleReleaseFunds} className="w-full bg-green-600 text-white py-6 text-[10px] font-extrabold uppercase tracking-[0.3em] hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4">
-                          <Unlock size={14} /> APPROVE & RELEASE FUNDS
+                        <button 
+                          onClick={handleReleaseFunds} 
+                          disabled={txLoading}
+                          className="w-full bg-green-600 text-white py-6 text-[10px] font-extrabold uppercase tracking-[0.3em] hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4 disabled:opacity-50"
+                        >
+                          {txLoading ? (
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          ) : (
+                            <Unlock size={14} />
+                          )}
+                          {txLoading ? "PROCESSING AUTH..." : "APPROVE & RELEASE FUNDS"}
                         </button>
                       ) : account?.address?.toLowerCase() === deal?.vendor_wallet?.toLowerCase() ? (
                         <div className="bg-accent/5 border border-accent/20 p-6 mb-6">
