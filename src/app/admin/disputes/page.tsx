@@ -7,11 +7,13 @@ import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { WhatsAppService } from "@/lib/whatsapp";
 import { useActiveAccount } from "thirdweb/react";
+import { useToast } from "@/components/Toast";
 
 const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"; // Same admin wallet
 
 export default function AdminDisputes() {
   const account = useActiveAccount();
+  const { showToast } = useToast();
   const [disputes, setDisputes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDispute, setSelectedDispute] = useState<any>(null);
@@ -96,19 +98,19 @@ export default function AdminDisputes() {
       .eq("id", selectedDispute.id);
 
     if (!dealError && !disputeError) {
-      alert(`Dispute resolved: ${status === "Released" ? "Funds released to Vendor" : "Funds refunded to Buyer"}`);
+      showToast(`Dispute resolved: ${status === "Released" ? "Funds released to Vendor" : "Funds refunded to Buyer"}`, "success");
       setSelectedDispute(null);
       setAdminNotes("");
       fetchDisputes();
       fetchMetrics();
     } else {
-      alert("Error resolving dispute.");
+      showToast("Error resolving dispute.", "error");
     }
   };
 
   if (loading || checkingRole) return <div className="premium-container pt-40 text-center opacity-20 font-extrabold uppercase tracking-[1em]">Scanning Conflicts...</div>;
 
-  const isAuthorized = userRole === 'admin' || (account && account.address.toLowerCase() === ADMIN_WALLET.toLowerCase());
+  const isAuthorized = account && (userRole === 'admin' || account.address.toLowerCase() === ADMIN_WALLET.toLowerCase());
 
   if (!isAuthorized) {
     return (

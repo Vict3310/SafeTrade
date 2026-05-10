@@ -9,6 +9,7 @@ import { inAppWallet } from "thirdweb/wallets";
 import { client } from "@/lib/thirdweb";
 import { usePaystackPayment } from "react-paystack";
 import Link from "next/link";
+import { useToast } from "@/components/Toast";
 import { WhatsAppService } from "@/lib/whatsapp";
 import { defineChain } from "thirdweb";
 
@@ -35,6 +36,7 @@ const smartAccountConfig = {
 export default function Dashboard() {
   const account = useActiveAccount();
   const address = account?.address || "0xNotConnected";
+  const { showToast } = useToast();
   
   const [deals, setDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,7 +143,7 @@ export default function Dashboard() {
       .ilike('wallet_address', account?.address); // CASE-INSENSITIVE MATCH
 
     if (!error) {
-      alert("Profile verified! Welcome to SafeTrade.");
+      showToast("Profile verified! Welcome to SafeTrade.", "success");
       await syncProfile(); // IMMEDIATELY RE-CHECK TO HIDE MODAL
     } else {
       console.error("Onboarding Error:", error);
@@ -189,13 +191,14 @@ export default function Dashboard() {
       ]);
 
     if (!error) {
+      showToast("Safe-Link Created Successfully!", "success");
       setShowCreateModal(false);
       setItemName("");
       setPrice("");
       setPriceNaira("");
       fetchDeals();
     } else {
-      alert(`Error: ${error.message}`);
+      showToast(`Error: ${error.message}`, "error");
     }
   };
 
@@ -214,7 +217,7 @@ export default function Dashboard() {
     
     initializePayment({
       onSuccess: (reference: any) => {
-        alert("Deposit Successful! In production, this would mint/send cUSD to your wallet.");
+        showToast("Deposit Successful! Wallet updated.", "success");
         setShowDepositModal(false);
         setDepositAmount("");
       },
@@ -230,26 +233,37 @@ export default function Dashboard() {
     const totalBalance = displayBalance + deals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.price_naira || 0), 0);
     
     if (!amount || amount <= 0) return;
-    if (amount > totalBalance) return alert("Insufficient balance!");
+    if (amount > totalBalance) return showToast("Insufficient balance!", "error");
 
     // In a real AA setup, this would trigger a contract call to withdraw cUSD
     setShowWithdrawModal(false);
     setWithdrawAmount("");
-    alert(`Withdrawal of ₦${amount.toLocaleString()} initiated! In production, this would trigger a cUSD -> Naira bank transfer.`);
+    showToast(`Withdrawal of ₦${amount.toLocaleString()} initiated!`, "info");
   };
 
   const handleWipeData = async () => {
     if (!account?.address) return;
-    if (!confirm("CRITICAL WARNING: This will permanently delete your profile and all your Safe-Links. This cannot be undone. Proceed?")) return;
+    if (!confirm("CRITICAL WARNING: This will permanently delete your profile and all your Safe-Links. This cannot be undone. You will be asked to sign to authorize this destruction.")) return;
 
-    setLoading(true);
-    // Delete deals
-    await supabase.from('deals').delete().eq('vendor_wallet', account.address);
-    // Delete profile
-    await supabase.from('profiles').delete().eq('wallet_address', account.address);
-    
-    alert("ACCOUNT WIPED. Resetting session...");
-    handleHardLogout();
+    try {
+      setLoading(true);
+      
+      // DESTRUCTION CHALLENGE: Sign to authorize data wipe
+      const message = `AUTHORIZE DESTRUCTION: I, ${account.address}, authorize the permanent deletion of my SafeTrade profile and all associated data. Timestamp: ${Date.now()}`;
+      await (account as any).signMessage({ message });
+
+      // Delete deals
+      await supabase.from('deals').delete().eq('vendor_wallet', account.address.toLowerCase());
+      // Delete profile
+      await supabase.from('profiles').delete().eq('wallet_address', account.address.toLowerCase());
+      
+      showToast("ACCOUNT WIPED. Resetting session...", "info");
+      handleHardLogout();
+    } catch (err) {
+      showToast("Destruction Cancelled: Authorization failed.", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
@@ -387,7 +401,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="col-span-1 lg:col-span-2 flex items-center justify-end gap-2">
-              <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(`${window.location.origin}/deal/${deal.safe_link_id}`); alert("Copied!"); }} className="flex-1 lg:flex-none p-3 border border-white/10 hover:bg-white hover:text-black text-[10px] font-extrabold transition-colors uppercase">LINK</button>
+              <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(`${window.location.origin}/deal/${deal.safe_link_id}`); showToast("Safe-Link Copied!", "info"); }} className="flex-1 lg:flex-none p-3 border border-white/10 hover:bg-white hover:text-black text-[10px] font-extrabold transition-colors uppercase">LINK</button>
               <button onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/?text=${encodeURIComponent(deal.item_name)}`, '_blank'); }} className="flex-1 lg:flex-none p-3 border border-green-500/20 text-green-500 hover:bg-green-500/10 text-[10px] font-extrabold transition-colors uppercase">WA</button>
               <button onClick={(e) => handleDelete(e, deal.id)} className="p-3 border border-red-500/20 text-red-500 hover:bg-red-500/10 text-[10px] font-extrabold transition-colors"><Trash2 size={12} /></button>
             </div>

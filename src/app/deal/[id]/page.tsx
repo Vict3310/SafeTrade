@@ -10,6 +10,7 @@ import { client } from "@/lib/thirdweb";
 import { usePaystackPayment } from "react-paystack";
 import { WhatsAppService } from "@/lib/whatsapp";
 import { defineChain, getContract } from "thirdweb";
+import { useToast } from "@/components/Toast";
 
 import { celoSepoliaTestnet } from "thirdweb/chains";
 const celoSepolia = celoSepoliaTestnet;
@@ -31,6 +32,7 @@ const smartAccountConfig = {
 export default function DealPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const account = useActiveAccount();
+  const { showToast } = useToast();
   const { mutate: sendTransaction } = useSendTransaction();
   
   const [deal, setDeal] = useState<any>(null);
@@ -39,16 +41,17 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [disputeReason, setDisputeReason] = useState("");
 
+  const fetchDeal = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('deals').select('*').eq('safe_link_id', id).single();
+    if (!error && data) { 
+      setDeal(data); 
+      setDealStatus(data.status); 
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchDeal = async () => {
-      setLoading(true);
-      const { data, error } = await supabase.from('deals').select('*').eq('safe_link_id', id).single();
-      if (!error && data) { 
-        setDeal(data); 
-        setDealStatus(data.status); 
-      }
-      setLoading(false);
-    };
     fetchDeal();
 
     const channel = supabase.channel(`deal_${id}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'deals', filter: `safe_link_id=eq.${id}` }, (payload) => {
@@ -70,7 +73,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
   const initializePayment = usePaystackPayment(config);
 
   const handleSecureFunds = () => {
-    if (!account) return alert("Please connect your vault first!");
+    if (!account) return showToast("Please connect your vault first!", "error");
     
     initializePayment({
       onSuccess: async (reference: any) => {
@@ -84,13 +87,13 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
         
         if (!error) {
           setDealStatus('Funded');
-          alert("FUNDS SECURED ON-CHAIN! The Smart Account has locked the cUSD equivalent in the SafeVault contract.");
+          showToast("FUNDS SECURED ON-CHAIN! The Smart Account has locked the cUSD equivalent in the SafeVault contract.", "success");
         } else {
-          alert("Database Error updating deal status.");
+          showToast("Database Error updating deal status.", "error");
         }
       },
       onClose: () => {
-        console.log("Payment window closed");
+        showToast("Payment window closed", "info");
       }
     });
   };
@@ -98,24 +101,40 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
   const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"; // Replace with your wallet
 
   const handleReleaseFunds = async () => {
-    if (dealStatus !== 'Funded') return alert("CRITICAL ERROR: Funds must be in 'Funded' state before release.");
+    if (dealStatus !== 'Funded') return showToast("CRITICAL ERROR: Funds must be in 'Funded' state before release.", "error");
     
     const isBuyer = account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase();
     const isAdmin = account?.address?.toLowerCase() === ADMIN_WALLET.toLowerCase();
 
     if (!isBuyer && !isAdmin) {
-      return alert("UNAUTHORIZED: Only the authorized buyer or SafeTrade Admin can release these funds.");
+      return showToast("UNAUTHORIZED: Only the authorized buyer or SafeTrade Admin can release these funds.", "error");
     }
 
-    if (!confirm("Are you sure you want to release the funds to the vendor? This action is irreversible.")) return;
-    
-    const { error } = await supabase.from('deals').update({ status: 'Released' }).eq('safe_link_id', id);
-    if (!error) {
-      setDealStatus('Released');
-      alert("FUNDS RELEASED ON-CHAIN! The transaction has been broadcast to the Celo network via Gasless Relay.");
-      WhatsAppService.sendUpdate('released', { itemName: deal.item_name, amount: deal.price_naira, id: deal.safe_link_id });
-    } else {
-      alert("Error releasing funds.");
+    if (!confirm("Are you sure you want to release the funds to the vendor? This action is irreversible. You will be asked to sign a message to authorize this.")) return;
+
+    setTxLoading(true);
+
+    try {
+      // CRYPTOGRAPHIC CHALLENGE: Prove you own this wallet
+      const message = `AUTHORIZE RELEASE: I, ${account.address}, authorize the release of funds for Safe-Link ${id}. Timestamp: ${Date.now()}`;
+      
+      // This pops up a "Sign Message" request in their wallet
+      // In Thirdweb, we use the account object directly for signing
+      await (account as any).signMessage({ message });
+
+      const { error } = await supabase.from('deals').update({ status: 'Released' }).eq('safe_link_id', id);
+      
+      if (!error) {
+        setDealStatus('Released');
+        showToast("FUNDS RELEASED ON-CHAIN! Authorization verified.", "success");
+        WhatsAppService.sendUpdate('released', { itemName: deal.item_name, amount: deal.price_naira, id: deal.safe_link_id });
+      } else {
+        showToast("Database Error releasing funds.", "error");
+      }
+    } catch (err) {
+      showToast("Authorization Failed: You must sign the message to release funds.", "error");
+    } finally {
+      setTxLoading(false);
     }
   };
 
@@ -135,7 +154,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
 
     setDealStatus('Disputed');
     setShowDisputeModal(false);
-    alert("Dispute raised. Funds are frozen.");
+    showToast("Dispute raised. Funds are frozen.", "info");
   };
 
   if (loading) return <div className="premium-container pt-40 text-center opacity-20 font-extrabold uppercase tracking-[1em]">Scanning Vault...</div>;
