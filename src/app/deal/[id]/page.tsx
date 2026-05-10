@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, Unlock, AlertCircle, ShieldCheck, ExternalLink, QrCode } from "lucide-react";
+import { Shield, Lock, Unlock, AlertCircle, ShieldCheck, ExternalLink, QrCode, Clock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { inAppWallet } from "thirdweb/wallets";
