@@ -81,12 +81,14 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${isDarkMode ? 'dark-mode' : ''}`}>
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" type="image/svg+xml" href="/log.svg" />
         <meta name="theme-color" content="#0047FF" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="SafeTrade" />
+        <meta name="apple-mobile-web-app-title" content="KOVA" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+        <title>KOVA | THE VAULT PROTOCOL</title>
       </head>
       <body className="antialiased">
         {mounted && (
