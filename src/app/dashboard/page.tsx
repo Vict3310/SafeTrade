@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Link as LinkIcon, CheckCircle, Clock, AlertTriangle, Trash2, Wallet, ArrowDownLeft, ArrowUpRight, Shield } from "lucide-react";
+import { Plus, Link as LinkIcon, CheckCircle, Clock, AlertTriangle, Trash2, Wallet, ArrowDownLeft, ArrowUpRight, Shield, Settings, Power, Zap } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { inAppWallet } from "thirdweb/wallets";
@@ -306,57 +306,60 @@ export default function Dashboard() {
       ) : (
         <>
           <Tour />
-          <div className="flex flex-col lg:flex-row justify-between lg:items-end items-start gap-8 mb-16">
-            <div className="flex items-center gap-6">
+          <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-8 mb-16 bg-white/5 border border-white/10 p-8">
+            <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="relative group">
                 <ConnectButton 
                   client={client} 
                   wallets={wallets} 
                   accountAbstraction={smartAccountConfig}
                 />
-                <div className="absolute -bottom-12 left-0 bg-accent text-white text-[8px] font-bold px-2 py-1 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  Click to Disconnect
-                </div>
               </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
+              <div className="text-center md:text-left">
+                <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                  <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest">Connected: {address.slice(0, 6)}...{address.slice(-4)}</span>
+                  <span className="text-[9px] font-black opacity-30 uppercase tracking-[0.2em]">Live Connection: {address.slice(0, 6)}...{address.slice(-4)}</span>
                 </div>
-                <h2 className="text-3xl lg:text-4xl font-extrabold mb-2 uppercase tracking-tighter">THE <span className="hollow-text">VAULT</span></h2>
-                <button onClick={handleHardLogout} className="text-[8px] font-bold opacity-30 hover:opacity-100 uppercase tracking-widest underline decoration-accent underline-offset-4">Force Session Reset</button>
+                <h2 className="text-4xl font-black uppercase tracking-tighter leading-none mb-2">THE <span className="hollow-text">VAULT</span></h2>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-4 w-full lg:w-auto items-center">
-              {/* Multi-Currency Toggle */}
-              <div className="flex bg-white/5 border border-white/10 p-1 rounded-sm">
+            <div className="flex flex-wrap items-center justify-center lg:justify-end gap-3">
+              {/* Discrete Currency Toggle */}
+              <div className="flex bg-black/40 border border-white/10 p-1 rounded-full mr-2">
                 <button 
                   onClick={() => setCurrency('NGN')}
-                  className={`px-3 py-1 text-[9px] font-bold transition-all ${currency === 'NGN' ? 'bg-white text-black' : 'opacity-40 hover:opacity-100'}`}
+                  className={`px-4 py-1.5 text-[9px] font-black rounded-full transition-all ${currency === 'NGN' ? 'bg-white text-black' : 'opacity-40 hover:opacity-100'}`}
                 >
                   NGN
                 </button>
                 <button 
                   onClick={() => setCurrency('USD')}
-                  className={`px-3 py-1 text-[9px] font-bold transition-all ${currency === 'USD' ? 'bg-white text-black' : 'opacity-40 hover:opacity-100'}`}
+                  className={`px-4 py-1.5 text-[9px] font-black rounded-full transition-all ${currency === 'USD' ? 'bg-white text-black' : 'opacity-40 hover:opacity-100'}`}
                 >
                   USD
                 </button>
               </div>
 
-              <Link href="/settings" className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-white/10 text-white px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-white/5 transition-all">
-                Settings
-              </Link>
-              {address.toLowerCase() === ADMIN_WALLET.toLowerCase() && (
-                <Link href="/admin/disputes" className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-red-500/20 text-red-500 px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
-                  <Shield size={14} /> Arbitration Center
+              {/* Action Icons */}
+              <div className="flex gap-2">
+                <Link href="/settings" title="Profile Settings" className="w-12 h-12 flex items-center justify-center border border-white/10 hover:bg-white hover:text-black transition-all">
+                  <Settings size={18} />
                 </Link>
-              )}
-              <button onClick={() => setShowWithdrawModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-white/20 text-white px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
-                <ArrowUpRight size={14} /> Withdraw
-              </button>
-              <button id="new-link-btn" onClick={() => setShowDepositModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-accent text-white px-8 py-4 text-[10px] font-extrabold uppercase tracking-[0.2em] hover:bg-accent/90 transition-all">
+                {address.toLowerCase() === ADMIN_WALLET.toLowerCase() && (
+                  <Link href="/admin/disputes" title="Arbitration Center" className="w-12 h-12 flex items-center justify-center border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                    <Shield size={18} />
+                  </Link>
+                )}
+                <button onClick={() => setShowWithdrawModal(true)} title="Withdraw Earnings" className="w-12 h-12 flex items-center justify-center border border-white/10 hover:bg-white hover:text-black transition-all">
+                  <ArrowUpRight size={18} />
+                </button>
+                <button onClick={handleHardLogout} title="Force Reset Session" className="w-12 h-12 flex items-center justify-center border border-red-500/10 text-red-500/40 hover:bg-red-500 hover:text-white transition-all">
+                  <Power size={18} />
+                </button>
+              </div>
+
+              <button id="new-link-btn" onClick={() => setShowDepositModal(true)} className="flex items-center gap-3 bg-accent text-white px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-accent/90 transition-all shadow-[0_0_20px_rgba(0,71,255,0.3)]">
                 <Plus size={16} /> New Safe-Link
               </button>
             </div>
