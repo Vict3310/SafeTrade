@@ -85,9 +85,15 @@ export default function Dashboard() {
     window.location.reload();
   };
 
-  const syncProfile = async () => {
-    if (!account?.address) return;
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
+  const syncProfile = async () => {
+    if (!account?.address) {
+      setIsProfileLoading(false);
+      return;
+    }
+
+    setIsProfileLoading(true);
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -104,7 +110,10 @@ export default function Dashboard() {
       setShowOnboarding(true);
     } else if (!data.full_name || !data.phone_number) {
       setShowOnboarding(true);
+    } else {
+      setShowOnboarding(false);
     }
+    setIsProfileLoading(false);
   };
 
   const handleOnboarding = async (e: React.FormEvent) => {
@@ -469,7 +478,7 @@ export default function Dashboard() {
             </motion.div>
           </div>
         )}
-        {showOnboarding && (
+        {!isProfileLoading && showOnboarding && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/95 backdrop-blur-xl" />
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative w-full max-w-md bg-[#0A0A0A] p-12 border border-white/10 text-center">
