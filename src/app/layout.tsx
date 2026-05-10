@@ -37,7 +37,9 @@ export default function RootLayout({
         msg.includes("MetaMask") ||
         msg.includes("runtime.lastError") ||
         msg.includes("Cross-Origin-Opener-Policy") ||
-        msg.includes("thirdweb.com/v1/chains/44787")
+        msg.includes("thirdweb.com/v1/chains/44787") ||
+        msg.includes("descendant of <button>") ||
+        msg.includes("nested <button>")
       ) return;
       originalFn.apply(console, args);
     };
