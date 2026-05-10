@@ -43,7 +43,9 @@ export default function Dashboard() {
   const { showToast } = useToast();
   
   const [deals, setDeals] = useState<any[]>([]);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [itemName, setItemName] = useState("");
