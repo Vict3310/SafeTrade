@@ -61,7 +61,10 @@ export default function Dashboard() {
   const displayBalance = balanceData ? parseFloat(balanceData.displayValue) * 1500 : 0; // Simulated Naira value
 
   useEffect(() => {
-    fetchDeals();
+    if (account?.address) {
+      fetchDeals();
+      syncProfile();
+    }
 
     // Set up real-time subscription
     const channel = supabase
@@ -71,14 +74,16 @@ export default function Dashboard() {
       })
       .subscribe();
 
-    if (account?.address) {
-      syncProfile();
-    }
-
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [account]);
+  }, [account?.address]); // React specifically to address changes
+
+  const handleHardLogout = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.reload();
+  };
 
   const syncProfile = async () => {
     if (!account?.address) return;
@@ -248,9 +253,10 @@ export default function Dashboard() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                  <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest">Connected: {address.slice(0,6)}...{address.slice(-4)}</span>
+                  <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest">Connected: {address}</span>
                 </div>
                 <h2 className="text-3xl lg:text-4xl font-extrabold mb-2 uppercase">THE VAULT</h2>
+                <button onClick={handleHardLogout} className="text-[8px] font-bold opacity-30 hover:opacity-100 uppercase tracking-widest underline decoration-accent underline-offset-4">Force Session Reset</button>
               </div>
             </div>
             <div className="flex flex-wrap gap-4 w-full lg:w-auto">
