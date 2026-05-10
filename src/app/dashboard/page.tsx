@@ -101,6 +101,7 @@ export default function Dashboard() {
       .maybeSingle();
 
     if (!data) {
+      // Create initial profile if it doesn't exist
       await supabase.from('profiles').insert([
         { 
           wallet_address: account.address,
@@ -108,10 +109,17 @@ export default function Dashboard() {
         }
       ]);
       setShowOnboarding(true);
-    } else if (!data.full_name || !data.phone_number) {
-      setShowOnboarding(true);
     } else {
-      setShowOnboarding(false);
+      // Pre-fill existing data to verify it was saved
+      if (data.full_name) setUserName(data.full_name);
+      if (data.phone_number) setUserPhone(data.phone_number);
+
+      // Only show onboarding if fields are empty
+      if (!data.full_name || !data.phone_number || data.full_name.trim() === "" || data.phone_number.trim() === "") {
+        setShowOnboarding(true);
+      } else {
+        setShowOnboarding(false);
+      }
     }
     setIsProfileLoading(false);
   };
