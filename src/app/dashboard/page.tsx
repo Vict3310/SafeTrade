@@ -101,7 +101,6 @@ export default function Dashboard() {
     window.location.reload();
   };
 
-  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   const syncProfile = async () => {
     if (!account?.address) {
