@@ -143,6 +143,8 @@ export default function SettingsPage() {
                     placeholder="+234..."
                   />
                 </div>
+              </div>
+
               <div>
                 <label className="text-[10px] font-bold opacity-40 uppercase tracking-widest block mb-4">Bank Name</label>
                 <div className="relative">
