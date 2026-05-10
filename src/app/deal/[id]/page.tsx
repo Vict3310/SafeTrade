@@ -220,7 +220,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
                     <div className="text-center pt-4">
                       <p className="text-xs font-bold opacity-60 uppercase tracking-widest mb-6 text-accent">Funds Secured in Vault</p>
                       
-                      {account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase() || account?.address?.toLowerCase() === ADMIN_WALLET.toLowerCase() ? (
+                      {account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase() ? (
                         <button onClick={handleReleaseFunds} className="w-full bg-green-600 text-white py-6 text-[10px] font-extrabold uppercase tracking-[0.3em] hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-4">
                           <Unlock size={14} /> APPROVE & RELEASE FUNDS
                         </button>
@@ -239,7 +239,7 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
                         <ExternalLink size={14} /> NOTIFY VENDOR ON WHATSAPP
                       </button>
 
-                      {(account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase() || account?.address?.toLowerCase() === ADMIN_WALLET.toLowerCase()) && (
+                      {account?.address?.toLowerCase() === deal?.buyer_wallet?.toLowerCase() && (
                         <button onClick={() => setShowDisputeModal(true)} className="w-full border border-red-500/30 text-red-500 py-4 text-[10px] font-extrabold uppercase hover:bg-red-500/10 transition-colors flex items-center justify-center gap-2">
                           <AlertCircle size={14} /> RAISE DISPUTE
                         </button>
