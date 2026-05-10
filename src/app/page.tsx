@@ -104,19 +104,19 @@ export default function LandingPage() {
             </div>
 
             <div className="col-span-12 lg:col-span-6">
-              <div className="hero-text grid grid-cols-2 gap-px bg-white/10 border border-white/10">
+              <div className="hero-text grid grid-cols-1 sm:grid-cols-2 gap-px bg-white/10 border border-white/10">
                  {[
                    { label: "Volume Secured", val: "$4.2M+", icon: <Lock size={14} /> },
                    { label: "Global Users", val: "128K", icon: <Zap size={14} /> },
                    { label: "Active Markets", val: "24", icon: <Globe size={14} /> },
                    { label: "Integrity Score", val: "100%", icon: <Shield size={14} /> }
                  ].map((stat, i) => (
-                   <div key={i} className="bg-primary p-8 hover:bg-white/[0.02] transition-colors group">
+                   <div key={i} className="bg-primary p-6 lg:p-8 hover:bg-white/[0.02] transition-colors group">
                       <div className="flex items-center gap-2 text-accent mb-4 opacity-40 group-hover:opacity-100 transition-opacity">
                         {stat.icon}
                         <span className="text-[9px] font-bold uppercase tracking-widest">{stat.label}</span>
                       </div>
-                      <p className="text-3xl font-extrabold tracking-tighter">{stat.val}</p>
+                      <p className="text-2xl lg:text-3xl font-extrabold tracking-tighter">{stat.val}</p>
                    </div>
                  ))}
               </div>
@@ -149,8 +149,8 @@ export default function LandingPage() {
             { num: "03", title: "Verify", desc: "Physical or digital fulfillment verified.", icon: <CheckCircle2 size={24} /> },
             { num: "04", title: "Release", desc: "Smart contract executes the payout.", icon: <FileText size={24} /> }
           ].map((step, i) => (
-            <div key={i} className="bg-primary p-8 lg:p-12 hover:bg-white/[0.02] transition-all group relative overflow-hidden">
-              <div className="absolute -right-4 -top-4 text-[80px] lg:text-[120px] font-extrabold hollow-text opacity-5 group-hover:opacity-20 transition-opacity pointer-events-none select-none">
+            <div key={i} className="bg-primary p-8 lg:p-12 hover:bg-white/[0.02] transition-all group relative overflow-hidden min-h-[220px]">
+              <div className="absolute -right-4 -top-2 text-[60px] lg:text-[120px] font-extrabold hollow-text opacity-5 group-hover:opacity-20 transition-opacity pointer-events-none select-none leading-none">
                 {step.num}
               </div>
               <div className="mb-12 text-accent opacity-50 group-hover:opacity-100 transition-opacity">
