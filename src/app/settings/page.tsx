@@ -48,6 +48,7 @@ export default function SettingsPage() {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!account?.address) return;
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
@@ -57,7 +58,7 @@ export default function SettingsPage() {
         bank_name: bankName,
         account_number: accountNumber
       })
-      .ilike('wallet_address', account?.address);
+      .ilike('wallet_address', account.address);
 
     if (!error) {
       showToast("Profile updated successfully!", "success");

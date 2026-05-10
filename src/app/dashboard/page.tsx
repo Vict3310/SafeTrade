@@ -148,13 +148,15 @@ export default function Dashboard() {
 
   const handleOnboarding = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!account?.address) return;
+    
     const { error } = await supabase
       .from('profiles')
       .update({ 
         full_name: userName, 
         phone_number: userPhone 
       })
-      .ilike('wallet_address', account?.address); // CASE-INSENSITIVE MATCH
+      .ilike('wallet_address', account.address); // Guaranteed string here
 
     if (!error) {
       showToast("Profile verified! Welcome to SafeTrade.", "success");
