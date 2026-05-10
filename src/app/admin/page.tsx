@@ -8,8 +8,10 @@ import { ShieldAlert, CheckCircle, XCircle, ExternalLink, Scale, Clock } from "l
 import { supabase } from "@/lib/supabase";
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { SAFETRADE_CONTRACT_ADDRESS, SAFETRADE_ABI } from "@/lib/contracts";
+import { useToast } from "@/components/Toast";
 
 export default function AdminDashboard() {
+  const { showToast } = useToast();
   const [disputedDeals, setDisputedDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDeal, setSelectedDeal] = useState<any>(null);
@@ -73,7 +75,7 @@ export default function AdminDashboard() {
     const winnerAddress = winner === 'Buyer' ? selectedDeal.buyer_wallet : selectedDeal.vendor_wallet;
 
     if (!winnerAddress) {
-      alert("No wallet address found for this party. Please ensure wallets are linked.");
+      showToast("No wallet address found for this party. Please ensure wallets are linked.", "error");
       return;
     }
     
@@ -87,7 +89,7 @@ export default function AdminDashboard() {
       });
     } catch (err: any) {
       console.error("Resolution error:", err);
-      alert(`Error: ${err.message}`);
+      showToast(`Error: ${err.message}`, "error");
     }
   };
 

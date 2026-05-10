@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useToast } from "@/components/Toast";
 import { WhatsAppService } from "@/lib/whatsapp";
 import { defineChain } from "thirdweb";
+import Tour from "@/components/Tour";
 
 import { celoSepoliaTestnet } from "thirdweb/chains";
 export const celoSepolia = celoSepoliaTestnet;
@@ -51,6 +52,7 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [userName, setUserName] = useState("");
   const [userPhone, setUserPhone] = useState("");
+  const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
 
   // REAL On-chain Balance (cUSD on Celo Sepolia)
   const { data: balanceData, isLoading: isBalanceLoading } = useWalletBalance({
@@ -61,6 +63,11 @@ export default function Dashboard() {
   });
 
   const displayBalance = balanceData ? parseFloat(balanceData.displayValue) * 1500 : 0; // Simulated Naira value
+
+  const formatPrice = (naira: number) => {
+    if (currency === 'NGN') return `₦${naira.toLocaleString()}`;
+    return `$${(naira / 1500).toFixed(2)}`;
+  };
 
   useEffect(() => {
     if (account?.address) {
@@ -290,6 +297,7 @@ export default function Dashboard() {
           />
         </div>
       ) : (
+        <Tour />
         <>
           <div className="flex flex-col lg:flex-row justify-between lg:items-end items-start gap-8 mb-16">
             <div className="flex items-center gap-6">
@@ -308,17 +316,31 @@ export default function Dashboard() {
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                   <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest">Connected: {address}</span>
                 </div>
-                <h2 className="text-3xl lg:text-4xl font-extrabold mb-2 uppercase">THE VAULT</h2>
+                <h2 className="text-3xl lg:text-4xl font-extrabold mb-2 uppercase tracking-tighter">THE <span className="hollow-text">VAULT</span></h2>
                 <button onClick={handleHardLogout} className="text-[8px] font-bold opacity-30 hover:opacity-100 uppercase tracking-widest underline decoration-accent underline-offset-4">Force Session Reset</button>
               </div>
             </div>
-            <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+
+            <div className="flex flex-wrap gap-4 w-full lg:w-auto items-center">
+              {/* Multi-Currency Toggle */}
+              <div className="flex bg-white/5 border border-white/10 p-1 rounded-sm">
+                <button 
+                  onClick={() => setCurrency('NGN')}
+                  className={`px-3 py-1 text-[9px] font-bold transition-all ${currency === 'NGN' ? 'bg-white text-black' : 'opacity-40 hover:opacity-100'}`}
+                >
+                  NGN
+                </button>
+                <button 
+                  onClick={() => setCurrency('USD')}
+                  className={`px-3 py-1 text-[9px] font-bold transition-all ${currency === 'USD' ? 'bg-white text-black' : 'opacity-40 hover:opacity-100'}`}
+                >
+                  USD
+                </button>
+              </div>
+
               <Link href="/settings" className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-white/10 text-white px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-white/5 transition-all">
                 Settings
               </Link>
-              <button onClick={() => setShowCreateModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-white text-black px-8 py-4 text-[10px] font-extrabold uppercase tracking-widest hover:bg-white/90 transition-all">
-                <Plus size={16} /> New Safe-Link
-              </button>
               {address.toLowerCase() === ADMIN_WALLET.toLowerCase() && (
                 <Link href="/admin/disputes" className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-red-500/20 text-red-500 px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
                   <Shield size={14} /> Arbitration Center
@@ -327,101 +349,123 @@ export default function Dashboard() {
               <button onClick={() => setShowWithdrawModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-white/20 text-white px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
                 <ArrowUpRight size={14} /> Withdraw
               </button>
-              <button onClick={() => setShowDepositModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-transparent border border-white/20 text-white px-6 py-4 text-[9px] font-extrabold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
-                <ArrowDownLeft size={14} /> Deposit
+              <button id="new-link-btn" onClick={() => setShowDepositModal(true)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-accent text-white px-8 py-4 text-[10px] font-extrabold uppercase tracking-[0.2em] hover:bg-accent/90 transition-all">
+                <Plus size={16} /> New Safe-Link
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-20">
-        <div className="col-span-1 lg:col-span-4 p-6 lg:p-8 bg-accent/5 border border-accent/20 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <Wallet size={120} />
-          </div>
-          <p className="text-[10px] font-bold text-accent tracking-[0.2em] mb-2 uppercase relative z-10">Fiat Vault Balance (NGN)</p>
-          <h3 className="text-4xl lg:text-5xl font-extrabold relative z-10 mb-2 tracking-tighter">
-            ₦{isBalanceLoading ? "..." : (displayBalance + deals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.price_naira || 0), 0)).toLocaleString()}
-          </h3>
-          <p className="text-[10px] opacity-40 font-bold uppercase tracking-widest relative z-10">
-            Real On-Chain: {balanceData?.displayValue || "0"} {balanceData?.symbol}
-          </p>
-        </div>
-        <div className="col-span-1 lg:col-span-4 p-6 lg:p-8 border border-white/10">
-          <p className="text-[10px] font-bold opacity-30 tracking-[0.2em] mb-2 uppercase">Active Deals</p>
-          <h3 className="text-4xl lg:text-5xl font-extrabold tracking-tighter">
-            {deals.filter(d => d.status === 'Funded').length.toString().padStart(2, '0')}
-          </h3>
-        </div>
-        <div className="col-span-1 lg:col-span-4 p-6 lg:p-8 border border-white/10">
-          <p className="text-[10px] font-bold opacity-30 tracking-[0.2em] mb-2 uppercase">Success Rate</p>
-          <h3 className="text-4xl lg:text-5xl font-extrabold tracking-tighter">
-            {deals.length > 0 
-              ? Math.round((deals.filter(d => d.status === 'Released').length / deals.length) * 100) 
-              : "100"}%
-          </h3>
-        </div>
-      </div>
-
-      <div className="deal-list mb-32">
-        <div className="grid grid-cols-12 px-8 py-4 border-b border-white/10 opacity-30 text-[10px] font-bold uppercase tracking-widest">
-          <div className="col-span-5">Item / Description</div>
-          <div className="col-span-2 text-center">Amount</div>
-          <div className="col-span-3 text-center">Status</div>
-          <div className="col-span-2 text-right">Actions</div>
-        </div>
-        
-        {loading ? (
-          <div className="p-20 text-center opacity-20 font-bold uppercase tracking-[0.5em]">Loading...</div>
-        ) : deals.map((deal) => (
-          <motion.div 
-            key={deal.id}
-            className="grid grid-cols-1 lg:grid-cols-12 px-6 lg:px-8 py-6 lg:py-8 border-b border-white/10 hover:bg-white/5 group cursor-pointer transition-colors gap-6 lg:gap-0"
-            onClick={() => window.open(`/deal/${deal.safe_link_id}`, '_blank')}
-          >
-            <div className="col-span-1 lg:col-span-5 flex items-center gap-4">
-              <div className="w-10 h-10 bg-white/5 flex items-center justify-center">
-                <LinkIcon size={16} className="opacity-50" />
-              </div>
-              <div>
-                <p className="font-extrabold uppercase tracking-tight">{deal.item_name}</p>
-                <div className="flex items-center gap-2">
-                   <p className="text-[10px] opacity-40 uppercase tracking-widest">ID: {deal.safe_link_id}</p>
-                   <span className="text-[7px] px-1 bg-white/5 border border-white/10 opacity-30 font-mono">OWNER: {deal.vendor_wallet?.slice(0,10)}...</span>
+          <div id="vault-stats" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            {/* Stats Cards with Haptic Hover */}
+            {[
+              { label: "Vault Balance", val: formatPrice(displayBalance + deals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.price_naira || 0), 0)), icon: <Wallet className="text-accent" />, color: "bg-accent/5 border-accent/20" },
+              { label: "Locked Funds", val: formatPrice(deals.filter(d => d.status === 'Funded').reduce((sum, d) => sum + (d.price_naira || 0), 0)), icon: <Clock className="text-yellow-500" />, color: "bg-yellow-500/5 border-yellow-500/20" },
+              { label: "Realized Income", val: formatPrice(deals.filter(d => d.status === 'Released').reduce((sum, d) => sum + (d.price_naira || 0), 0)), icon: <CheckCircle className="text-green-500" />, color: "bg-green-500/5 border-green-500/20" }
+            ].map((stat, i) => (
+              <motion.div 
+                key={i}
+                whileHover={{ y: -5, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`${stat.color} border p-8 transition-all cursor-default relative overflow-hidden group`}
+              >
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="p-3 bg-white/5 rounded-full">{stat.icon}</div>
+                  </div>
+                  <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-1">{stat.label}</p>
+                  <p className="text-3xl font-extrabold tracking-tight">{stat.val}</p>
                 </div>
-              </div>
-            </div>
-            <div className="col-span-1 lg:col-span-2 flex items-center lg:justify-center justify-between font-bold">
-              <span className="lg:hidden text-[9px] opacity-40 uppercase tracking-widest">Amount</span>
-              ₦{deal.price_naira?.toLocaleString() || '0'}
-            </div>
-            <div className="col-span-1 lg:col-span-3 flex items-center lg:justify-center justify-between">
-              <span className="lg:hidden text-[9px] opacity-40 uppercase tracking-widest">Status</span>
-              <div className={`px-4 py-1 text-[9px] font-extrabold uppercase tracking-widest border ${deal.status === 'Released' ? 'border-green-500/50 text-green-500 bg-green-500/10' : deal.status === 'Disputed' ? 'border-red-500/50 text-red-500 bg-red-500/10' : 'border-white/20 text-white bg-white/5'}`}>
-                {deal.status}
-              </div>
-            </div>
-            <div className="col-span-1 lg:col-span-2 flex items-center justify-end gap-2">
-              <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(`${window.location.origin}/deal/${deal.safe_link_id}`); showToast("Safe-Link Copied!", "info"); }} className="flex-1 lg:flex-none p-3 border border-white/10 hover:bg-white hover:text-black text-[10px] font-extrabold transition-colors uppercase">LINK</button>
-              <button onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/?text=${encodeURIComponent(deal.item_name)}`, '_blank'); }} className="flex-1 lg:flex-none p-3 border border-green-500/20 text-green-500 hover:bg-green-500/10 text-[10px] font-extrabold transition-colors uppercase">WA</button>
-              <button onClick={(e) => handleDelete(e, deal.id)} className="p-3 border border-red-500/20 text-red-500 hover:bg-red-500/10 text-[10px] font-extrabold transition-colors"><Trash2 size={12} /></button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+              </motion.div>
+            ))}
+          </div>
 
-      <div className="mb-32">
-        <h2 className="text-xl font-extrabold uppercase tracking-[0.4em] opacity-40 mb-8 text-center">The Ledger</h2>
-        <div className="bg-[#0A0A0A] border border-white/10">
-          {deals.filter(d => d.status === 'Released' || d.status === 'Resolved').map((deal) => (
-            <div key={deal.id} className="grid grid-cols-12 px-8 py-8 border-b border-white/5 hover:bg-white/5">
-              <div className="col-span-8 font-extrabold uppercase">{deal.item_name} <span className="opacity-40 ml-4 font-normal text-[10px]">CERT: {deal.id}</span></div>
-              <div className="col-span-4 text-right">
-                <button onClick={() => window.print()} className="text-[9px] font-extrabold uppercase border border-white/20 px-4 py-2 hover:bg-white hover:text-black">Receipt</button>
-              </div>
+          <div className="deal-list mb-32">
+            <div className="grid grid-cols-12 px-8 py-4 border-b border-white/10 opacity-30 text-[10px] font-bold uppercase tracking-widest mb-4">
+              <div className="col-span-12 lg:col-span-5">Item / Description</div>
+              <div className="hidden lg:block lg:col-span-2 text-center">Amount</div>
+              <div className="hidden lg:block lg:col-span-3 text-center">Status</div>
+              <div className="hidden lg:block lg:col-span-2 text-right">Actions</div>
             </div>
-          ))}
-        </div>
-      </div>
+            
+            {loading ? (
+              // Skeleton Loaders
+              [1, 2, 3].map(i => (
+                <div key={i} className="h-24 w-full skeleton mb-4 border border-white/5" />
+              ))
+            ) : deals.length === 0 ? (
+              // Beautiful Empty State
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="py-32 border border-white/5 border-dashed flex flex-col items-center justify-center text-center"
+              >
+                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 opacity-20">
+                  <LinkIcon size={32} />
+                </div>
+                <h4 className="text-xl font-extrabold uppercase mb-2">No Safe-Links Found</h4>
+                <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest max-w-xs leading-relaxed">
+                  Start your first high-trust transaction by creating a secure escrow link for your customer.
+                </p>
+                <button onClick={() => setShowCreateModal(true)} className="mt-8 px-8 py-4 border border-white/20 text-[10px] font-extrabold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+                  Create First Link
+                </button>
+              </motion.div>
+            ) : (
+              deals.map((deal) => (
+                <motion.div 
+                  key={deal.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  whileHover={{ x: 5 }}
+                  onClick={() => window.location.href = `/deal/${deal.safe_link_id}`}
+                  className="bg-white/5 border border-white/10 p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 items-center gap-6 cursor-pointer group hover:bg-white/10 transition-all mb-4 relative overflow-hidden"
+                >
+                  <div className="col-span-12 lg:col-span-5 flex items-center gap-4">
+                    <div className={`p-3 rounded-full ${deal.status === 'Funded' ? 'bg-accent/20 text-accent relative' : 'bg-white/5 opacity-40'}`}>
+                      <LinkIcon size={18} />
+                      {deal.status === 'Funded' && <div className="absolute inset-0 bg-accent rounded-full animate-ping opacity-20"></div>}
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-1">ID: {deal.safe_link_id.slice(0,8)}</p>
+                      <h4 className="text-lg font-extrabold uppercase group-hover:text-accent transition-colors">{deal.item_name}</h4>
+                    </div>
+                  </div>
+                  <div className="col-span-12 lg:col-span-2 flex lg:flex-col justify-between items-baseline">
+                    <span className="lg:hidden text-[9px] opacity-40 uppercase tracking-widest">Amount</span>
+                    <p className="font-extrabold text-lg">{formatPrice(deal.price_naira || 0)}</p>
+                  </div>
+                  <div className="col-span-12 lg:col-span-3 flex lg:flex-col justify-between items-baseline">
+                    <span className="lg:hidden text-[9px] opacity-40 uppercase tracking-widest">Status</span>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-1.5 h-1.5 rounded-full ${deal.status === 'Funded' ? 'bg-accent animate-pulse' : deal.status === 'Released' ? 'bg-green-500' : 'bg-white/20'}`} />
+                      <span className={`text-[11px] font-black uppercase tracking-widest ${deal.status === 'Funded' ? 'text-accent' : deal.status === 'Released' ? 'text-green-500' : 'opacity-40'}`}>
+                        {deal.status}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="col-span-12 lg:col-span-2 flex items-center justify-end gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(`${window.location.origin}/deal/${deal.safe_link_id}`); showToast("Safe-Link Copied!", "info"); }} className="flex-1 lg:flex-none p-3 border border-white/10 hover:bg-white hover:text-black text-[10px] font-extrabold transition-colors uppercase">LINK</button>
+                    <button onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/?text=${encodeURIComponent(deal.item_name)}`, '_blank'); }} className="flex-1 lg:flex-none p-3 border border-green-500/20 text-green-500 hover:bg-green-500/10 text-[10px] font-extrabold transition-colors uppercase">WA</button>
+                    <button onClick={(e) => handleDelete(e, deal.id)} className="p-3 border border-red-500/20 text-red-500 hover:bg-red-500/10 text-[10px] font-extrabold transition-colors"><Trash2 size={12} /></button>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </div>
+
+          <div id="ledger-section" className="mb-32">
+            <h2 className="text-xl font-extrabold uppercase tracking-[0.4em] opacity-40 mb-8 text-center">The Ledger</h2>
+            <div className="bg-[#0A0A0A] border border-white/10">
+              {deals.filter(d => d.status === 'Released' || d.status === 'Resolved').map((deal) => (
+                <div key={deal.id} className="grid grid-cols-12 px-8 py-8 border-b border-white/5 hover:bg-white/5 group">
+                  <div className="col-span-8 font-extrabold uppercase group-hover:text-accent transition-colors">{deal.item_name} <span className="opacity-40 ml-4 font-normal text-[10px]">CERT: {deal.id}</span></div>
+                  <div className="col-span-4 text-right">
+                    <button onClick={() => window.print()} className="text-[9px] font-extrabold uppercase border border-white/20 px-4 py-2 hover:bg-white hover:text-black transition-all">Receipt</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
       {/* Modals */}
       <AnimatePresence>

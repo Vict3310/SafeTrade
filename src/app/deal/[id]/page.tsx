@@ -11,6 +11,7 @@ import { usePaystackPayment } from "react-paystack";
 import { WhatsAppService } from "@/lib/whatsapp";
 import { defineChain, getContract } from "thirdweb";
 import { useToast } from "@/components/Toast";
+import confetti from "canvas-confetti";
 
 import { celoSepoliaTestnet } from "thirdweb/chains";
 const celoSepolia = celoSepoliaTestnet;
@@ -126,6 +127,12 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
       
       if (!error) {
         setDealStatus('Released');
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#0047FF', '#ffffff', '#00ff00']
+        });
         showToast("FUNDS RELEASED ON-CHAIN! Authorization verified.", "success");
         WhatsAppService.sendUpdate('released', { itemName: deal.item_name, amount: deal.price_naira, id: deal.safe_link_id });
       } else {
@@ -162,6 +169,27 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
 
   return (
     <div className="premium-container pt-20 lg:pt-32 pb-40">
+      {/* Escrow Progress Tracker */}
+      <div className="max-w-4xl mx-auto mb-20 px-6">
+        <div className="flex justify-between items-center relative">
+          <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/10 -z-10"></div>
+          {[
+            { step: 'Pending', label: 'Initiated', icon: <Plus size={12} /> },
+            { step: 'Funded', label: 'Secured', icon: <Lock size={12} /> },
+            { step: 'Released', label: 'Completed', icon: <ShieldCheck size={12} /> }
+          ].map((s, i) => {
+            const isActive = dealStatus === s.step || (dealStatus === 'Released' && i < 3) || (dealStatus === 'Funded' && i < 2);
+            return (
+              <div key={i} className="flex flex-col items-center gap-4 bg-[#0A0A0A] px-4">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${isActive ? 'border-accent bg-accent text-white' : 'border-white/10 text-white/20'}`}>
+                  {s.icon}
+                </div>
+                <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isActive ? 'text-white' : 'opacity-20'}`}>{s.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
         <div className="col-span-1 lg:col-span-7">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

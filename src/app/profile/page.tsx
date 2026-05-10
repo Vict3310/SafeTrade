@@ -5,9 +5,11 @@ import { motion } from "framer-motion";
 import { User, Store, Phone, ShieldCheck, Star, Save } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAccount } from 'wagmi';
+import { useToast } from "@/components/Toast";
 
 export default function ProfilePage() {
   const { address } = useAccount();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState({
@@ -57,7 +59,7 @@ export default function ProfilePage() {
       .eq('wallet_address', address);
 
     if (!profileError) {
-       alert("Profile updated successfully!");
+       showToast("Profile updated successfully!", "success");
     }
     setSaving(false);
   };

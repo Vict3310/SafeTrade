@@ -7,10 +7,12 @@ import { supabase } from "@/lib/supabase";
 import { useActiveAccount } from "thirdweb/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/Toast";
 
 export default function SettingsPage() {
   const account = useActiveAccount();
   const router = useRouter();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -49,10 +51,10 @@ export default function SettingsPage() {
       .ilike('wallet_address', account?.address);
 
     if (!error) {
-      alert("Profile updated successfully!");
+      showToast("Profile updated successfully!", "success");
       fetchProfile();
     } else {
-      alert("Error updating profile.");
+      showToast("Error updating profile.", "error");
     }
     setSaving(false);
   };
