@@ -17,6 +17,8 @@ export default function AdminDisputes() {
   const [selectedDispute, setSelectedDispute] = useState<any>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [allDeals, setAllDeals] = useState<any[]>([]);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [checkingRole, setCheckingRole] = useState(true);
 
   const fetchMetrics = async () => {
     const { data, error } = await supabase
@@ -43,10 +45,36 @@ export default function AdminDisputes() {
     setLoading(false);
   };
 
+  const fetchUserRole = async () => {
+    if (!account) {
+      setCheckingRole(false);
+      return;
+    }
+    
+    // First check hardcoded wallet for absolute priority
+    if (account.address.toLowerCase() === ADMIN_WALLET.toLowerCase()) {
+      setUserRole('admin');
+      setCheckingRole(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('wallet_address', account.address)
+      .single();
+    
+    if (!error && data) {
+      setUserRole(data.role);
+    }
+    setCheckingRole(false);
+  };
+
   useEffect(() => {
     fetchDisputes();
     fetchMetrics();
-  }, []);
+    fetchUserRole();
+  }, [account]);
 
   const resolveDispute = async (status: "Released" | "Refunded") => {
     if (!selectedDispute) return;
@@ -78,9 +106,11 @@ export default function AdminDisputes() {
     }
   };
 
-  if (loading) return <div className="premium-container pt-40 text-center opacity-20 font-extrabold uppercase tracking-[1em]">Scanning Conflicts...</div>;
+  if (loading || checkingRole) return <div className="premium-container pt-40 text-center opacity-20 font-extrabold uppercase tracking-[1em]">Scanning Conflicts...</div>;
 
-  if (!account || account.address.toLowerCase() !== ADMIN_WALLET.toLowerCase()) {
+  const isAuthorized = userRole === 'admin' || (account && account.address.toLowerCase() === ADMIN_WALLET.toLowerCase());
+
+  if (!isAuthorized) {
     return (
       <div className="premium-container pt-40 text-center">
         <Shield size={64} className="mx-auto mb-8 text-red-500 opacity-20" />
