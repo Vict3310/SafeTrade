@@ -104,7 +104,7 @@ export default function LandingPage() {
             </div>
 
             <div className="col-span-12 lg:col-span-6">
-              <div className="hero-text grid grid-cols-2 gap-px bg-white/10 border border-white/10">
+              <div className="hero-text grid grid-cols-2 gap-px bg-white/10 border border-white/10 mx-2 lg:mx-0">
                  {[
                    { label: "Volume Secured", val: "$4.2M+", icon: <Lock size={14} /> },
                    { label: "Global Users", val: "128K", icon: <Zap size={14} /> },
