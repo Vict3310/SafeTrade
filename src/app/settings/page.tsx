@@ -30,10 +30,11 @@ export default function SettingsPage() {
   }, [account?.address]);
 
   const fetchProfile = async () => {
+    if (!account?.address) return;
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .ilike('wallet_address', account?.address) // CASE-INSENSITIVE
+      .ilike('wallet_address', account.address) // CASE-INSENSITIVE
       .maybeSingle();
     
     if (data) {
