@@ -8,10 +8,8 @@ import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { inAppWallet } from "thirdweb/wallets";
 import { client } from "@/lib/thirdweb";
 import { usePaystackPayment } from "react-paystack";
-import Link from "next/link";
-import { useToast } from "@/components/Toast";
-import { WhatsAppService } from "@/lib/whatsapp";
-import { defineChain, createWallet } from "thirdweb";
+import { defineChain } from "thirdweb";
+import { createWallet } from "thirdweb/wallets";
 import Tour from "@/components/Tour";
 
 import { celoSepoliaTestnet } from "thirdweb/chains";
