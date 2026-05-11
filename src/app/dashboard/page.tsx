@@ -16,8 +16,8 @@ import Tour from "@/components/Tour";
 import { defineChain } from "thirdweb";
 import { createWallet } from "thirdweb/wallets";
 
-import { celoSepoliaTestnet } from "thirdweb/chains";
-export const celoSepolia = celoSepoliaTestnet;
+import { celo } from "thirdweb/chains";
+export const currentChain = celo;
 import { useWalletBalance } from "thirdweb/react";
 
 const wallets = [
@@ -33,7 +33,7 @@ const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"; // Replace wi
 
 // Account Abstraction Config for Gasless Transactions
 const smartAccountConfig = {
-  chain: celoSepolia, // Celo Sepolia
+  chain: currentChain, // Celo Mainnet
   sponsorGas: true,
 };
 

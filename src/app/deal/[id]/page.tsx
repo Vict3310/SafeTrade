@@ -15,9 +15,10 @@ import { useToast } from "@/components/Toast";
 import confetti from "canvas-confetti";
 import Link from "next/link";
 import { EXCHANGE_RATE, SERVICE_FEE_PERCENT } from "@/lib/constants";
+import { EmailService } from "@/lib/email";
 
-import { celoSepoliaTestnet } from "thirdweb/chains";
-const celoSepolia = celoSepoliaTestnet;
+import { celo } from "thirdweb/chains";
+const currentChain = celo;
 import { useWalletBalance, useSendTransaction } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
 
@@ -30,7 +31,7 @@ const wallets = [
 
 // Account Abstraction Config
 const smartAccountConfig = {
-  chain: celoSepolia,
+  chain: currentChain,
   sponsorGas: true,
 };
 
@@ -151,6 +152,11 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
         });
         showToast("FUNDS RELEASED ON-CHAIN! Authorization verified.", "success");
         WhatsAppService.sendUpdate('released', { itemName: deal.item_name, amount: deal.price_naira, id: deal.safe_link_id });
+        EmailService.notifyFundsReleased({
+          dealId: deal.safe_link_id,
+          amount: deal.price_naira,
+          fee: deal.service_fee || 0
+        });
       } else {
         showToast("Database Error releasing funds.", "error");
       }
@@ -174,6 +180,15 @@ export default function DealPage({ params }: { params: Promise<{ id: string }> }
       evidence_notes: disputeReason,
       status: 'Open'
     }]);
+
+    // Send email alert to admin
+    EmailService.notifyDisputeRaised({
+      dealId: deal.safe_link_id,
+      reason: disputeReason,
+      itemName: deal.item_name,
+      amount: deal.price_naira,
+      buyerWallet: account?.address || "Unknown"
+    });
 
     setDealStatus('Disputed');
     setShowDisputeModal(false);
