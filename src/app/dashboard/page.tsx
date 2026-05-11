@@ -64,7 +64,7 @@ export default function Dashboard() {
   // REAL On-chain Balance (cUSD on Celo Sepolia)
   const { data: balanceData, isLoading: isBalanceLoading } = useWalletBalance({
     client,
-    chain: celoSepolia,
+    chain: currentChain,
     address: account?.address,
     // For cUSD, we'd normally pass the token address, but for CELO native:
   });
