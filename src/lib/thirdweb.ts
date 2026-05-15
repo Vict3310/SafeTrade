@@ -1,7 +1,10 @@
 import { createThirdwebClient } from "thirdweb";
 
-// Replace this with your actual Thirdweb Client ID from the dashboard
-const clientId = process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "YOUR_DUMMY_CLIENT_ID";
+const clientId = process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID;
+
+if (!clientId) {
+  throw new Error("CRITICAL: NEXT_PUBLIC_THIRDWEB_CLIENT_ID is missing.");
+}
 
 export const client = createThirdwebClient({
   clientId,

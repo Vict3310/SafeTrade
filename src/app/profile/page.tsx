@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+
 import { User, Store, Phone, ShieldCheck, Star, Save } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { useAccount } from 'wagmi';
+import { useActiveAccount } from "thirdweb/react";
 import { useToast } from "@/components/Toast";
+import { useCallback } from "react";
 
 export default function ProfilePage() {
-  const { address } = useAccount();
+  const account = useActiveAccount();
+  const address = account?.address;
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -19,18 +21,13 @@ export default function ProfilePage() {
     wallet_address: ""
   });
 
-  useEffect(() => {
-    if (address) {
-      fetchProfile();
-    }
-  }, [address]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
+    if (!address) return;
     setLoading(true);
     const { data, error } = await supabase
       .from('profiles')
       .select('*, shops(*)')
-      .eq('wallet_address', address)
+      .eq('wallet_address', address.toLowerCase())
       .single();
 
     if (!error && data) {
@@ -42,7 +39,13 @@ export default function ProfilePage() {
       });
     }
     setLoading(false);
-  };
+  }, [address]);
+
+  useEffect(() => {
+    if (address) {
+      fetchProfile();
+    }
+  }, [address, fetchProfile]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

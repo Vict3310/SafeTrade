@@ -1,169 +1,36 @@
-"use client";
-
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { ThirdwebProvider } from "thirdweb/react";
-import { ToastProvider } from "@/components/Toast";
+import ClientLayout from "@/components/ClientLayout";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-main" });
 
-import { Zap, Lock, Shield, Rocket, Globe, ShieldCheck, Settings } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+export const metadata: Metadata = {
+  title: "KOVA | The Secure Vault for High-Trust Trade",
+  description: "Secure your transactions with KOVA. The trust layer for Computer Village and beyond. Escrow protection for high-value physical goods.",
+  openGraph: {
+    title: "KOVA | The Secure Vault",
+    description: "Funds secured in the SafeVault. Real-time escrow protection.",
+    images: ["/og-image.png"], 
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KOVA | Secure Every Deal",
+    description: "The trust protocol for physical marketplaces.",
+  }
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // ... (rest of the component)
-  const [mounted, setMounted] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [tickerItems, setTickerItems] = useState<any[]>([
-    { icon: <Shield size={10} />, text: "SAFE-VAULT PROTOCOL ACTIVE" },
-    { icon: <Lock size={10} />, text: "VERIFYING GLOBAL NODES" },
-    { icon: <Zap size={10} />, text: "SCANNING FOR NEW LINKS" }
-  ]);
-
-  useEffect(() => {
-    setMounted(true);
-    const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setIsDarkMode(dark);
-
-    const fetchActivity = async () => {
-      const { data } = await supabase
-        .from('deals')
-        .select('item_name, status, price_naira')
-        .order('created_at', { ascending: false })
-        .limit(5);
-      
-      if (data && data.length > 0) {
-        const items = data.map(d => ({
-          icon: d.status === 'Released' ? <ShieldCheck size={10} className="text-green-500" /> : <Zap size={10} className="text-accent" />,
-          text: `${d.status === 'Released' ? 'RELEASED' : 'SECURED'}: ${d.item_name.toUpperCase()} (₦${d.price_naira?.toLocaleString() || '0'})`
-        }));
-        setTickerItems(items);
-      }
-    };
-
-    fetchActivity();
-
-    // Suppress common browser extension / wallet conflict errors in console
-    const originalError = console.error;
-    const originalWarn = console.warn;
-    
-    const filter = (args: any[], originalFn: Function) => {
-      const msg = args[0]?.toString() || "";
-      if (
-        msg.includes("ethereum") || 
-        msg.includes("extension") || 
-        msg.includes("MetaMask") ||
-        msg.includes("runtime.lastError") ||
-        msg.includes("Cross-Origin-Opener-Policy") ||
-        msg.includes("thirdweb.com/v1/chains/44787") ||
-        msg.includes("descendant of <button>") ||
-        msg.includes("nested <button>")
-      ) return;
-      originalFn.apply(console, args);
-    };
-
-    console.error = (...args) => filter(args, originalError);
-    console.warn = (...args) => filter(args, originalWarn);
-    
-    window.onerror = (message) => {
-      if (message.toString().includes("ethereum")) return true;
-      return false;
-    };
-  }, []);
-
   return (
-    <html lang="en" className={`${inter.variable} ${isDarkMode ? 'dark-mode' : ''}`}>
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" type="image/svg+xml" href="/log.svg" />
-        <meta name="theme-color" content="#0047FF" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="KOVA" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
-        <meta name="talentapp:project_verification" content="5550063fad4ac0b5a97259dad85966471ef08d7838b3d1e60d4a8ac6c431e330e01dbdbcc23ba6185107f8e34c7e7f6ada7502fcd044c83462533b7b5fdcdd36" />
-        <title>KOVA | THE VAULT PROTOCOL</title>
-      </head>
-      <body className="antialiased">
-        {mounted && (
-          <ThirdwebProvider>
-            <ToastProvider>
-              <div className="app-container min-h-screen flex flex-col">
-                {/* Real-time Activity Ticker */}
-                <div className="w-full bg-accent text-white py-2 overflow-hidden whitespace-nowrap border-b border-white/10">
-                  <div className="flex gap-12 animate-[marquee_30s_linear_infinite] px-4">
-                    {tickerItems.map((item, i) => (
-                      <span key={i} className="text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                        {item.icon} {item.text} <div className="w-1 h-1 bg-white rounded-full"></div>
-                      </span>
-                    ))}
-                    {/* Duplicate for seamless loop */}
-                    {tickerItems.map((item, i) => (
-                      <span key={`dup-${i}`} className="text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                        {item.icon} {item.text} <div className="w-1 h-1 bg-white rounded-full"></div>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <header className="premium-container py-6 lg:py-10 thin-border-bottom flex flex-col md:flex-row justify-between items-center gap-6">
-                  <div className="logo flex flex-col items-center md:items-start text-center md:text-left">
-                    <Link href="/">
-                      <h1 className="text-2xl font-black tracking-tighter uppercase leading-none cursor-pointer">
-                        KOVA<span className="hollow-text">.</span>
-                      </h1>
-                    </Link>
-                    <p className="text-[9px] font-bold opacity-30 uppercase tracking-[0.2em] mt-1">THE VAULT PROTOCOL</p>
-                  </div>
-                  <nav className="flex gap-6 lg:gap-10 items-center justify-center">
-                    <Link href="/" className="text-[11px] lg:text-[12px] font-bold opacity-60 hover:opacity-100 transition-opacity">HOME</Link>
-                    <Link href="/dashboard" className="text-[11px] lg:text-[12px] font-bold opacity-60 hover:opacity-100 transition-opacity">DASHBOARD</Link>
-                    <div className="h-4 w-[1px] bg-white/10 mx-1 lg:mx-2" />
-                    <button 
-                      onClick={() => setIsDarkMode(!isDarkMode)}
-                      className="text-[9px] lg:text-[10px] font-bold border-[0.5px] border-white/20 px-3 py-1 rounded-full hover:bg-white hover:text-black transition-colors"
-                    >
-                      {isDarkMode ? 'LIGHT' : 'DARK'}
-                    </button>
-                    <Link href="/settings" title="Profile Settings" className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all">
-                      <Settings size={14} />
-                    </Link>
-                  </nav>
-                </header>
-                <main className="flex-grow">
-                  {children}
-                </main>
-                <footer className="premium-container px-4 md:px-8 py-12 thin-border-top mt-20">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
-                    <div className="max-w-md">
-                      <div className="flex gap-4 mb-6 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
-                        <div className="flex items-center gap-2 text-[8px] font-bold border border-white/20 px-2 py-1">🛡️ SSL SECURED</div>
-                        <div className="flex items-center gap-2 text-[8px] font-bold border border-white/20 px-2 py-1">⛓️ CELO NETWORK</div>
-                        <div className="flex items-center gap-2 text-[8px] font-bold border border-white/20 px-2 py-1">🔒 KOVA VAULT v1</div>
-                      </div>
-                      <h2 className="text-2xl font-extrabold">KOVA <span className="hollow-text">THE VAULT</span></h2>
-                      <p className="text-sm opacity-50 leading-relaxed">
-                        KOVA bridges the trust gap in high-activity markets using smart contract technology. 
-                        Securing transactions between vendors and buyers globally.
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-bold opacity-30 mb-2 uppercase">Protocol Version 1.0.0</p>
-                      <p className="text-[10px] font-bold opacity-30 uppercase">© 2024 KOVA LABS</p>
-                    </div>
-                  </div>
-                </footer>
-              </div>
-            </ToastProvider>
-          </ThirdwebProvider>
-        )}
+    <html lang="en">
+      <body className={`${inter.variable} font-sans bg-black text-white antialiased selection:bg-accent selection:text-white`}>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

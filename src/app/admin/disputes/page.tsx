@@ -6,14 +6,18 @@ import { Shield, AlertCircle, CheckCircle, XCircle, Info, ArrowLeft, ExternalLin
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { WhatsAppService } from "@/lib/whatsapp";
-import { useActiveAccount } from "thirdweb/react";
+import { useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { getContract, prepareContractCall } from "thirdweb";
+import { client } from "@/lib/thirdweb";
+import { SAFETRADE_CONTRACT_ADDRESS, SAFETRADE_ABI } from "@/lib/contracts";
+import { celo } from "thirdweb/chains";
 import { useToast } from "@/components/Toast";
 
-const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"; // Same admin wallet
 
 export default function AdminDisputes() {
   const account = useActiveAccount();
   const { showToast } = useToast();
+  const { mutateAsync: sendTransaction } = useSendTransaction();
   const [disputes, setDisputes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDispute, setSelectedDispute] = useState<any>(null);
@@ -53,20 +57,13 @@ export default function AdminDisputes() {
       return;
     }
     
-    // First check hardcoded wallet for absolute priority
-    if (account.address.toLowerCase() === ADMIN_WALLET.toLowerCase()) {
-      setUserRole('admin');
-      setCheckingRole(false);
-      return;
-    }
-
     const { data, error } = await supabase
       .from('profiles')
       .select('role')
-      .eq('wallet_address', account.address)
-      .single();
+      .ilike('wallet_address', account.address)
+      .maybeSingle();
     
-    if (!error && data) {
+    if (data) {
       setUserRole(data.role);
     }
     setCheckingRole(false);
@@ -81,36 +78,58 @@ export default function AdminDisputes() {
   const resolveDispute = async (status: "Released" | "Refunded") => {
     if (!selectedDispute) return;
     
-    // Update the deal status
-    const { error: dealError } = await supabase
-      .from("deals")
-      .update({ status: status })
-      .eq("id", selectedDispute.deal_id);
+    const winner = status === "Released" ? selectedDispute.deals.vendor_wallet : selectedDispute.buyer_wallet; // Assuming buyer_wallet in disputes
 
-    // Update the dispute status and notes
-    const { error: disputeError } = await supabase
-      .from("disputes")
-      .update({ 
-        status: "Resolved",
-        admin_notes: adminNotes,
-        winner_id: status === "Released" ? selectedDispute.deals.vendor_id : selectedDispute.raised_by
-      })
-      .eq("id", selectedDispute.id);
+    // Call contract to resolve dispute
+    const contract = getContract({
+      client,
+      address: SAFETRADE_CONTRACT_ADDRESS,
+      chain: celo,
+      abi: SAFETRADE_ABI,
+    });
 
-    if (!dealError && !disputeError) {
-      showToast(`Dispute resolved: ${status === "Released" ? "Funds released via KOVA" : "Funds refunded to Buyer"}`, "success");
-      setSelectedDispute(null);
-      setAdminNotes("");
-      fetchDisputes();
-      fetchMetrics();
-    } else {
-      showToast("Error resolving dispute.", "error");
+    const transaction = prepareContractCall({
+      contract,
+      method: "resolveDispute",
+      params: [BigInt(selectedDispute.deals.blockchain_deal_id), winner],
+    });
+
+    try {
+      await sendTransaction(transaction);
+
+      // Update the deal status
+      const { error: dealError } = await supabase
+        .from("deals")
+        .update({ status: status })
+        .eq("id", selectedDispute.deal_id);
+
+      // Update the dispute status and notes
+      const { error: disputeError } = await supabase
+        .from("disputes")
+        .update({ 
+          status: "Resolved",
+          admin_notes: adminNotes,
+          winner_id: status === "Released" ? selectedDispute.deals.vendor_id : selectedDispute.raised_by
+        })
+        .eq("id", selectedDispute.id);
+
+      if (!dealError && !disputeError) {
+        showToast(`Dispute resolved: ${status === "Released" ? "Funds released via KOVA" : "Funds refunded to Buyer"}`, "success");
+        setSelectedDispute(null);
+        setAdminNotes("");
+        fetchDisputes();
+        fetchMetrics();
+      } else {
+        showToast("Error resolving dispute.", "error");
+      }
+    } catch (err) {
+      showToast("Transaction failed.", "error");
     }
   };
 
   if (loading || checkingRole) return <div className="premium-container pt-40 text-center opacity-20 font-extrabold uppercase tracking-[1em]">Scanning Conflicts...</div>;
 
-  const isAuthorized = account && (userRole === 'admin' || account.address.toLowerCase() === ADMIN_WALLET.toLowerCase());
+  const isAuthorized = account && userRole === 'admin';
 
   if (!isAuthorized) {
     return (

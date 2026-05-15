@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { User, Phone, Shield, ArrowLeft, Save, Trash2, CheckCircle, Landmark, CreditCard } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -8,10 +8,11 @@ import { useActiveAccount } from "thirdweb/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
+import Skeleton from "@/components/Skeleton";
 
 export default function SettingsPage() {
   const account = useActiveAccount();
-  const router = useRouter();
+
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -21,15 +22,7 @@ export default function SettingsPage() {
   const [bankName, setBankName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
 
-  useEffect(() => {
-    if (account?.address) {
-      fetchProfile();
-    } else {
-      setLoading(false);
-    }
-  }, [account?.address]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!account?.address) return;
     const { data, error } = await supabase
       .from('profiles')
@@ -45,7 +38,15 @@ export default function SettingsPage() {
       setAccountNumber(data.account_number || "");
     }
     setLoading(false);
-  };
+  }, [account?.address]);
+
+  useEffect(() => {
+    if (account?.address) {
+      fetchProfile();
+    } else {
+      setLoading(false);
+    }
+  }, [account?.address, fetchProfile]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +84,15 @@ export default function SettingsPage() {
     window.location.href = "/";
   };
 
-  if (loading) return <div className="premium-container pt-40 text-center opacity-20 font-extrabold uppercase tracking-[1em]">Accessing Profile...</div>;
+  if (loading) return (
+    <div className="premium-container pt-32 max-w-2xl mx-auto">
+      <Skeleton className="h-16 w-64 mb-16" />
+      <div className="space-y-12">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-96 w-full" count={1} />
+      </div>
+    </div>
+  );
 
   if (!account) {
     return (

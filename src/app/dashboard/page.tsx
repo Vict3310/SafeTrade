@@ -15,6 +15,9 @@ import { EXCHANGE_RATE, SERVICE_FEE_PERCENT } from "@/lib/constants";
 import Tour from "@/components/Tour";
 import { defineChain } from "thirdweb";
 import { createWallet } from "thirdweb/wallets";
+import { PriceService } from "@/lib/prices";
+import Skeleton from "@/components/Skeleton";
+import { useCallback, useMemo } from "react";
 
 import { celo } from "thirdweb/chains";
 export const currentChain = celo;
@@ -28,8 +31,6 @@ const wallets = [
     },
   }),
 ];
-
-const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"; // Replace with your wallet
 
 // Account Abstraction Config for Gasless Transactions
 const smartAccountConfig = {
@@ -60,6 +61,19 @@ export default function Dashboard() {
   const [userBank, setUserBank] = useState("");
   const [userAccount, setUserAccount] = useState("");
   const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
+  const [liveCeloPrice, setLiveCeloPrice] = useState<number | null>(null);
+  const [cooldown, setCooldown] = useState(false);
+
+  useEffect(() => {
+    const fetchLivePrice = async () => {
+      const price = await PriceService.getCeloPriceNGN();
+      setLiveCeloPrice(price);
+      if (priceNaira && price) {
+        setPrice((parseFloat(priceNaira) / price).toFixed(4));
+      }
+    };
+    fetchLivePrice();
+  }, [priceNaira]);
 
   // REAL On-chain Balance (cUSD on Celo Sepolia)
   const { data: balanceData, isLoading: isBalanceLoading } = useWalletBalance({
@@ -76,16 +90,57 @@ export default function Dashboard() {
     return `$${(naira / EXCHANGE_RATE).toFixed(2)}`;
   };
 
+  const fetchDeals = useCallback(async () => {
+    if (!account?.address) return;
+    setLoading(true);
+    const { data } = await supabase
+      .from('deals')
+      .select('*')
+      .eq('vendor_wallet', account.address.toLowerCase())
+      .order('created_at', { ascending: false });
+    if (data) setDeals(data);
+    setLoading(false);
+  }, [account?.address]);
+
+  const syncProfile = useCallback(async () => {
+    if (!account?.address) {
+      setIsProfileLoading(false);
+      return;
+    }
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .ilike('wallet_address', account.address)
+      .maybeSingle();
+    
+    if (data) {
+      setProfile(data);
+      setUserName(data.full_name || "");
+      setUserPhone(data.phone_number || "");
+      if (!data.full_name || !data.phone_number) {
+        setShowOnboarding(true);
+      }
+    } else {
+      const { data: newProfile } = await supabase
+        .from('profiles')
+        .insert([{ wallet_address: account.address.toLowerCase(), role: 'client' }])
+        .select()
+        .single();
+      if (newProfile) setProfile(newProfile);
+      setShowOnboarding(true);
+    }
+    setIsProfileLoading(false);
+  }, [account?.address]);
+
   useEffect(() => {
     if (account?.address) {
       fetchDeals();
       syncProfile();
     }
 
-    // Set up real-time subscription
     const channel = supabase
       .channel('deals_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'deals' }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'deals' }, () => {
         fetchDeals();
       })
       .subscribe();
@@ -93,7 +148,7 @@ export default function Dashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [account?.address]); // React specifically to address changes
+  }, [account?.address]); 
 
   const handleHardLogout = () => {
     localStorage.clear();
@@ -101,54 +156,15 @@ export default function Dashboard() {
     window.location.reload();
   };
 
-
-  const syncProfile = async () => {
-    if (!account?.address) {
-      setIsProfileLoading(false);
-      return;
-    }
-
-    setIsProfileLoading(true);
-    const cleanAddress = account.address.trim().toLowerCase();
-    
-    // First, try to fetch the existing profile to see if they already have a special role (like Admin)
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .ilike('wallet_address', cleanAddress)
-      .maybeSingle();
-
-    const { data: profile, error: upsertError } = await supabase
-      .from('profiles')
-      .upsert({ 
-        wallet_address: cleanAddress, 
-        full_name: existingProfile?.full_name || userName || '',
-        role: existingProfile?.role || 'client' // PRESERVE ADMIN ROLE
-      }, { 
-        onConflict: 'wallet_address',
-        ignoreDuplicates: false 
-      })
-      .select()
-      .maybeSingle();
-
-    if (upsertError) {
-      console.error("Profile Sync Error:", upsertError);
-    } else if (profile) {
-      setProfile(profile);
-      if (profile.full_name) {
-        setUserName(profile.full_name);
-        setUserPhone(profile.phone_number || "");
-        setShowOnboarding(false);
-      } else {
-        setShowOnboarding(true);
-      }
-    }
-    setIsProfileLoading(false);
-  };
-
   const handleOnboarding = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!account?.address) return;
+
+    // Issue 23: Phone Validation
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(userPhone)) {
+      return showToast("Please enter a valid international phone number (e.g., +234...)", "error");
+    }
     
     const { error } = await supabase
       .from('profiles')
@@ -156,52 +172,42 @@ export default function Dashboard() {
         full_name: userName, 
         phone_number: userPhone 
       })
-      .ilike('wallet_address', account.address); // Guaranteed string here
+      .ilike('wallet_address', account.address);
 
     if (!error) {
       showToast("Profile verified! Welcome to KOVA.", "success");
-      await syncProfile(); // IMMEDIATELY RE-CHECK TO HIDE MODAL
+      await syncProfile(); 
     } else {
       console.error("Onboarding Error:", error);
     }
   };
 
-  const fetchDeals = async () => {
-    if (!account?.address) return;
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('deals')
-      .select('*')
-      .ilike('vendor_wallet', account.address) // CASE-INSENSITIVE MATCH
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setDeals(data);
-    }
-    setLoading(false);
-  };
-
   const handleCreateLink = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Cryptographically secure ID generation
-    const safeLinkId = crypto.randomUUID().split('-')[0].toUpperCase() + "-" + Math.floor(1000 + Math.random() * 9000);
+    if (cooldown) return showToast("Please wait 30 seconds between link creations.", "error");
+    const safeLinkId = crypto.randomUUID();
     const qrSecret = crypto.randomUUID();
+
+    // Use live price or fallback
+    const currentPrice = liveCeloPrice || 1350;
+    const calculatedCelo = parseFloat(priceNaira) / currentPrice;
 
     const fee = (parseFloat(priceNaira) || 0) * 0.015;
     const payout = (parseFloat(priceNaira) || 0) - fee;
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('deals')
       .insert([
         { 
           item_name: itemName, 
-          price_celo: parseFloat(price), 
+          price_celo: calculatedCelo, 
           price_naira: parseFloat(priceNaira) || 0,
           service_fee: fee,
           payout_naira: payout,
           safe_link_id: safeLinkId,
           qr_code_secret: qrSecret,
           vendor_wallet: address.toLowerCase(),
+          vendor_id: profile?.id,
           status: 'Pending' 
         }
       ]);
@@ -213,26 +219,28 @@ export default function Dashboard() {
       setPrice("");
       setPriceNaira("");
       fetchDeals();
+      setCooldown(true);
+      setTimeout(() => setCooldown(false), 30000);
     } else {
       showToast(`Error: ${error.message}`, "error");
     }
   };
 
-  const config = {
+  const paystackConfig = useMemo(() => ({
     reference: (new Date()).getTime().toString(),
-    email: "user@kova.com", // Mock email for testing
-    amount: (parseFloat(depositAmount) || 0) * 100, // Amount is in kobo
+    email: "user@kova.com",
+    amount: (parseFloat(depositAmount) || 0) * 100,
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "",
-  };
+  }), [depositAmount]);
 
-  const initializePayment = usePaystackPayment(config);
+  const initializePayment = usePaystackPayment(paystackConfig);
 
   const handleDeposit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!depositAmount || parseFloat(depositAmount) <= 0) return;
-    
+
     initializePayment({
-      onSuccess: (reference: any) => {
+      onSuccess: () => {
         showToast("Deposit Successful! Wallet updated.", "success");
         setShowDepositModal(false);
         setDepositAmount("");
@@ -266,7 +274,7 @@ export default function Dashboard() {
       
       // DESTRUCTION CHALLENGE: Sign to authorize data wipe
       const message = `AUTHORIZE DESTRUCTION: I, ${account.address}, authorize the permanent deletion of my KOVA profile and all associated data. Timestamp: ${Date.now()}`;
-      await (account as any).signMessage({ message });
+      await account.signMessage({ message });
 
       // Delete deals
       await supabase.from('deals').delete().eq('vendor_wallet', account.address.toLowerCase());
@@ -322,7 +330,7 @@ export default function Dashboard() {
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                   <span className="text-[9px] font-black opacity-30 uppercase tracking-[0.2em]">Live Connection: {address.slice(0, 6)}...{address.slice(-4)}</span>
                 </div>
-                <h2 className="text-4xl font-black uppercase tracking-tighter leading-none mb-2">KOVA <span className="hollow-text">THE VAULT</span></h2>
+                <h2 className="text-4xl font-black uppercase tracking-tighter leading-none mb-2">TRUST IS <span className="text-accent">THE PROTOCOL</span></h2>
               </div>
             </div>
 
@@ -345,8 +353,8 @@ export default function Dashboard() {
 
               {/* Action Icons */}
               <div className="flex gap-2">
-                {/* Admin Access (Dynamic & Hardcoded) */}
-                {(profile?.role === 'admin' || address.toLowerCase() === ADMIN_WALLET.toLowerCase()) && (
+                {/* Admin Access (Secure RBAC) */}
+                {profile?.role === 'admin' && (
                   <Link href="/admin/disputes" title="Arbitration Center" className="w-10 h-10 rounded-full flex items-center justify-center border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
                     <Shield size={16} />
                   </Link>
@@ -390,14 +398,8 @@ export default function Dashboard() {
             ))}
           </div>
 
-          <div className="deal-list mb-32">
-            <div className="grid grid-cols-12 px-8 py-4 border-b border-white/10 opacity-30 text-[10px] font-bold uppercase tracking-widest mb-4">
-              <div className="col-span-12 lg:col-span-5">Item / Description</div>
-              <div className="hidden lg:block lg:col-span-2 text-center">Amount</div>
-              <div className="hidden lg:block lg:col-span-3 text-center">Status</div>
-              <div className="hidden lg:block lg:col-span-2 text-right">Actions</div>
-            </div>
-            
+          {/* DEAL LISTING */}
+          <div className="space-y-4">
             {loading ? (
               // Skeleton Loaders
               [1, 2, 3].map(i => (
@@ -531,45 +533,8 @@ export default function Dashboard() {
         {showCreateModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowCreateModal(false)} />
-            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-xl bg-[#111] p-12 border border-white/10">
-              <h2 className="text-3xl font-extrabold mb-8 uppercase">CREATE SAFE-LINK</h2>
-              <form onSubmit={handleCreateLink} className="space-y-8">
-                <input type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} className="w-full bg-transparent border-b border-white/20 py-4 outline-none focus:border-white text-xl font-bold transition-colors" placeholder="Item Name" required />
-                <div className="grid grid-cols-2 gap-8">
-                  <div>
-                    <label className="text-[9px] font-bold opacity-40 uppercase tracking-widest">Naira Value</label>
-                    <input type="number" value={priceNaira} onChange={(e) => { setPriceNaira(e.target.value); setPrice((parseFloat(e.target.value) / EXCHANGE_RATE).toFixed(4)); }} className="w-full bg-transparent border-b border-white/20 py-4 outline-none focus:border-white text-xl font-bold transition-colors" placeholder="NGN" />
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-bold opacity-40 uppercase tracking-widest">cUSD Value (Auto-Calc)</label>
-                    <input type="number" step="0.0001" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-transparent border-b border-white/20 py-4 outline-none focus:border-white text-xl font-bold transition-colors opacity-50" placeholder="cUSD" readOnly />
-                  </div>
-                </div>
-
-                {priceNaira && (
-                  <div className="bg-accent/5 border border-accent/20 p-6 space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
-                      <span className="opacity-40">KOVA<span className="hollow-text">.</span> Fee (1.5%)</span>
-                      <span className="text-red-400">- ₦{(parseFloat(priceNaira) * 0.015).toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-xs font-extrabold uppercase tracking-widest pt-2 border-t border-accent/10">
-                      <span>Estimated Payout</span>
-                      <span className="text-accent">₦{(parseFloat(priceNaira) * 0.985).toLocaleString()}</span>
-                    </div>
-                  </div>
-                )}
-
-                <button type="submit" className="w-full bg-white text-black py-6 text-[10px] font-extrabold uppercase tracking-[0.3em] hover:bg-white/90">GENERATE LINK</button>
-              </form>
-            </motion.div>
-          </div>
-        )}
-        {!isProfileLoading && showOnboarding && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/95 backdrop-blur-xl" />
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative w-full max-w-md bg-[#0A0A0A] p-12 border border-white/10 text-center">
-              <Shield size={64} className="mx-auto mb-8 text-accent" />
-              <h2 className="text-3xl font-extrabold mb-2 uppercase tracking-tighter">Identity Verification</h2>
+            <motion.div initial={{ scale: 0.95, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 20 }} className="relative w-full max-w-md bg-[#0A0A0A] p-12 border border-white/10 text-center">
+              <h2 className="text-3xl font-extrabold mb-2 uppercase">Identity Verification</h2>
               <p className="text-xs font-bold opacity-40 uppercase tracking-widest mb-12">Complete your auditor profile to begin trading.</p>
               
               <form onSubmit={handleOnboarding} className="space-y-8 text-left">

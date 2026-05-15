@@ -71,13 +71,13 @@ export default function LandingPage() {
                    animate={{ opacity: 1, x: 0 }}
                    className="flex items-center gap-3 bg-accent/10 border border-accent/20 px-4 py-2 text-[8px] lg:text-[10px] font-extrabold uppercase tracking-[0.4em] text-accent w-fit mb-8 lg:mb-12"
                  >
-                   <Shield size={12} /> Universal Escrow Infrastructure
+                   <Shield size={12} /> The Trust Layer for Computer Village
                  </motion.div>
               </div>
 
-              <h1 className="hero-text text-[clamp(2.5rem,12vw,12rem)] font-extrabold leading-[0.8] mb-8 lg:mb-12 uppercase tracking-tighter">
+              <h1 className="hero-text text-[clamp(2.5rem,10vw,10rem)] font-extrabold leading-[0.8] mb-8 lg:mb-12 uppercase tracking-tighter">
                 TRUST IS <br />
-                <span className="hollow-text">NON-NEGOTIABLE</span>
+                <span className="text-accent">NON-NEGOTIABLE</span>
               </h1>
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function LandingPage() {
                 The <br/><span className="hollow-text">Vault</span>
               </h2>
               <p className="text-sm font-bold opacity-60 uppercase tracking-widest leading-relaxed mb-12">
-                Built on top of Celo Sepolia, our smart contracts guarantee that funds are mathematically protected until conditions are met.
+                Built on top of Celo, our smart contracts guarantee that funds are mathematically protected until conditions are met.
               </p>
               <button className="px-8 py-4 border border-white/20 font-extrabold uppercase tracking-[0.2em] text-[10px] hover:bg-white hover:text-black transition-all">
                 Audit Reports
